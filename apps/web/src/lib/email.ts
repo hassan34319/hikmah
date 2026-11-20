@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { SITE_URL } from "./env";
 
 const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.EMAIL_FROM ?? "Hikmah Institute <no-reply@mail.hikmahinstitute.org.pk>";
+const from = process.env.EMAIL_FROM ?? "Hikmah Institute <no-reply@hikmahinstitute.org.pk>";
 /** The site's own logo once deployed. On localhost, emails fall back to a hosted logo (email apps cannot load localhost). */
 export const emailLogoUrl = process.env.EMAIL_LOGO_URL || (/localhost|127\.0\.0\.1/.test(SITE_URL) ? undefined : `${SITE_URL}/logo.png`);
 

@@ -10,7 +10,7 @@ const out = join(dirname(fileURLToPath(import.meta.url)), "../../../supabase/tem
 mkdirSync(out, { recursive: true });
 const files = { "confirm-signup.html": true, "magic-link.html": false } as const;
 for (const [name, firstTime] of Object.entries(files)) {
-  const html = await render(<AuthCodeEmail firstTime={firstTime} />, { pretty: true });
+  const html = await render(<AuthCodeEmail firstTime={firstTime} logoUrl={process.env.EMAIL_LOGO_URL ?? "https://hikmah-navy.vercel.app/logo.png"} />, { pretty: true });
   writeFileSync(join(out, name), html);
   console.log("wrote", join("supabase/templates", name));
 }

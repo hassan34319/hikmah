@@ -31,8 +31,8 @@ export function SignInForm({ next, linkError }: { next: string; linkError?: bool
       <form action={verify} className="hk-form">
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="next" value={next} />
-        <Field label="6 digit code" htmlFor="code" error={error}>
-          <TextInput id="code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus
+        <Field label="Code from your email" htmlFor="code" error={error}>
+          <TextInput id="code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" maxLength={12} required autoFocus
             style={{ fontSize: 22, letterSpacing: "0.4em", textAlign: "center" }} />
         </Field>
         <Button type="submit" block disabled={verifying}>{verifying ? "Checking..." : "Sign in"}</Button>

@@ -29,12 +29,12 @@ export const chapters = [
     async run({ page, d, BASE }) {
       if (!/\/events\//.test(page.url())) { await d.goto(`${BASE}/events`); await d.click(page.getByRole('link', { name: EVENT }).first(), { nav: true }); }
       await d.click(page.getByRole('link', { name: /^Register/ }).first(), { nav: true });
-      d.step('Sign in or sign up', 'Same screen for both. We email a 6-digit code');
+      d.step('Sign in or sign up', 'Same screen for both. We email a sign-in code');
       await d.type(page.locator('input[name="email"]'), d.email('hk.student'));
       await d.click(page.getByRole('button', { name: 'Send me a code' }));
       await page.locator('input[name="code"]').waitFor({ timeout: 60_000 }).catch(() => {});
       await d.wait(1200);
-      const code = await d.ask(`Check ${d.email('hk.student')} and type the 6-digit code here (or paste the sign-in link):`);
+      const code = await d.ask(`Check ${d.email('hk.student')} and type the code here (or paste the sign-in link):`);
       if (/^https?:\/\//.test(code)) {
         await page.goto(code, { waitUntil: 'networkidle' });
       } else {

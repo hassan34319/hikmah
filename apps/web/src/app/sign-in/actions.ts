@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export type SignInState = { step: "email" | "code"; email?: string; error?: string; info?: string };
 
 const emailSchema = z.string().trim().toLowerCase().email("Please enter a valid email address.");
-const codeSchema = z.string().trim().regex(/^\d{6}$/, "The code is 6 digits.");
+const codeSchema = z.string().transform((v) => v.replace(/\s/g, "")).pipe(z.string().regex(/^\d{6,10}$/, "Enter the code from your email."));
 
 export async function sendCode(_prev: SignInState, form: FormData): Promise<SignInState> {
   if (!supabaseConfigured) return { step: "email", error: "Supabase is not connected yet." };
@@ -26,8 +26,11 @@ export async function sendCode(_prev: SignInState, form: FormData): Promise<Sign
       emailRedirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
-  if (error) return { step: "email", email: parsed.data, error: friendly(error.message) };
-  return { step: "code", email: parsed.data, info: `We emailed ${parsed.data}. Enter the 6 digit code, or just click the sign in link in the email.` };
+  if (error) {
+    console.error("[sign-in] signInWithOtp failed:", error.status, error.code, error.message);
+    return { step: "email", email: parsed.data, error: friendly(error.message) };
+  }
+  return { step: "code", email: parsed.data, info: `We emailed ${parsed.data}. Enter the code, or just click the sign in link in the email.` };
 }
 
 export async function verifyCode(prev: SignInState, form: FormData): Promise<SignInState> {
@@ -48,5 +51,6 @@ export async function verifyCode(prev: SignInState, form: FormData): Promise<Sig
 
 function friendly(message: string) {
   if (/rate|seconds/i.test(message)) return "Please wait a minute before asking for another code.";
+  if (/sending|smtp|email/i.test(message)) return "We could not send the email right now. Please try again in a few minutes.";
   return "We could not send the code. Please try again.";
 }
