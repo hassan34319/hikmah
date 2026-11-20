@@ -8,7 +8,14 @@ export default function LmsHome() {
       <main style={{ flex: 1 }}>
         <PageBand eyebrow="Students and faculty" title="Hikmah LMS" lead="Classes, materials and announcements for accepted students. Coming in a later phase." />
       </main>
-      <Footer />
+      <Footer
+        phone="+92 333 0382121"
+        email="info@hikmahinstitute.org.pk"
+        whatsapp="https://wa.me/923330382121"
+        campuses={["150-A, Sindhi Muslim Society, Block A", "66-A Faisal Street 2, DHA Phase 8"]}
+        socials={[]}
+        learn={[]}
+      />
     </div>
   );
 }

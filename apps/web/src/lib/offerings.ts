@@ -4,6 +4,7 @@ import { createClient } from "./supabase/server";
 
 export type OfferingWithType = OfferingRow & {
   offering_types: { slug: string; name: string; kind: OfferingKind } | null;
+  venues?: { name: string } | null;
 };
 
 const SELECT = "*, offering_types!inner(slug, name, kind)";
@@ -14,7 +15,7 @@ export async function listOfferings(kind: OfferingKind, limit?: number): Promise
   const supabase = await createClient();
   let query = supabase
     .from("offerings")
-    .select(SELECT)
+    .select(`${SELECT}, venues(name)`)
     .eq("status", "published")
     .eq("offering_types.kind", kind)
     .order("pinned", { ascending: false })
