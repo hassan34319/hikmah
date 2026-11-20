@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
 import { WeekCarousel, type WeekItem } from "@/components/WeekCarousel";
 import { listOfferings, type OfferingWithType } from "@/lib/offerings";
-import { PARTNERS, RIBBON, STATS, TALKS, TESTIMONIALS } from "@/lib/site-content";
+import { RIBBON, STATS, TALKS, TESTIMONIALS } from "@/lib/site-content";
 
 export const dynamic = "force-dynamic";
 
@@ -90,12 +90,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Partners */}
-      <section className="hk-container hm-partners">
-        <span>Hikmah circles and workshops run at universities and workplaces across Karachi</span>
-        <div>{PARTNERS.map((p, i) => <span key={i}>{p}</span>)}</div>
-      </section>
-
       {/* This week */}
       {week.length > 0 && <section className="hm-section"><WeekCarousel items={week} /></section>}
 
@@ -142,7 +136,6 @@ export default async function HomePage() {
                     <span><strong>{c.title}</strong><span className="hm-muted"> · {c.subtitle}</span></span><span aria-hidden="true">→</span>
                   </Link>
                 ))}
-                <a href="https://hikmahinstitute.org.pk/hifz/"><span><strong>Hifz Program</strong><span className="hm-muted"> · all ages</span></span><span aria-hidden="true">→</span></a>
               </div>
               <Link href="/courses" className="hk-pill hk-pill--dark">View all courses <span className="hk-pill__arrow">→</span></Link>
             </div>
