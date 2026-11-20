@@ -129,6 +129,9 @@ export interface Database {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       has_role: { Args: { check_role: AppRole }; Returns: boolean };
       registration_open: { Args: { oid: string }; Returns: boolean };
+      register_for_offering: { Args: { p_slug: string; p_answers: Json }; Returns: RegistrationRow };
+      cancel_registration: { Args: { p_registration_id: string }; Returns: RegistrationRow };
+      seats_taken: { Args: { p_offering_id: string }; Returns: number };
     };
     Enums: {
       app_role: AppRole;

@@ -37,6 +37,24 @@ Public website, admin dashboard and (later) LMS for Hikmah Institute, Karachi.
 5. `cp apps/web/.env.example apps/web/.env.local` and fill in the project URL and publishable key (Project settings > API Keys).
 6. `pnpm dev:web` and open http://localhost:3000.
 
+## Emails
+
+- **Sign-in emails** are sent by Supabase. Once custom SMTP (Resend) is connected, paste
+  `supabase/templates/confirm-signup.html` into the "Confirm signup" template and
+  `supabase/templates/magic-link.html` into "Magic Link" (Authentication > Emails > Templates).
+  They show the 6 digit code and a one-click link. Regenerate them with `pnpm --filter @hikmah/emails export:auth`.
+- **Registration emails** (confirmed, waitlisted, application received) are sent by the website through Resend.
+  Set `RESEND_API_KEY` and `EMAIL_FROM` in `apps/web/.env.local`. Without a key, emails are skipped and logged.
+- Templates live in `packages/emails` (React Email), so every email shares the same design.
+
+## Registering
+
+`/register/<slug>` shows the person's saved details plus the offering's own questions. Submitting calls the
+`register_for_offering` database function, which decides the status (courses: submitted; events: confirmed
+until seats run out, then waitlisted), creates a QR ticket code when the event has QR tickets on, and blocks
+double registration. Cancelling (`cancel_registration`) frees the seat and moves the first waitlisted person up.
+The confirmation page `/account/registrations/<id>` doubles as the QR ticket.
+
 ## Make yourself super admin
 
 After signing in once, run in the SQL editor:

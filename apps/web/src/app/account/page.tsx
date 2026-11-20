@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = { title: "My account" };
 
 const STATUS_LABEL: Record<string, string> = {
-  submitted: "Submitted", confirmed: "Confirmed", waitlisted: "Waitlisted", cancelled: "Cancelled", attended: "Attended", no_show: "Missed",
+  submitted: "Applied", confirmed: "Confirmed", waitlisted: "Waitlisted", cancelled: "Cancelled", attended: "Attended", no_show: "Missed",
 };
 
 export default async function AccountPage() {
@@ -38,7 +38,7 @@ export default async function AccountPage() {
           {registrations.map((r) => r.offerings && (
             <div key={r.id} style={{ display: "flex", justifyContent: "space-between", gap: 12, borderTop: "1px solid var(--hk-border)", paddingTop: 12 }}>
               <div>
-                <Link href={`/${r.offerings.offering_types?.kind === "course" ? "courses" : "events"}/${r.offerings.slug}`} style={{ fontWeight: 600 }}>{r.offerings.title}</Link>
+                <Link href={`/account/registrations/${r.id}`} style={{ fontWeight: 600 }}>{r.offerings.title}</Link>
                 <div style={{ fontSize: 14, color: "var(--hk-muted)" }}>{formatEventDate(r.offerings.starts_at) ?? "Course application"}</div>
               </div>
               <span style={{ fontSize: 13, fontWeight: 600 }}>{STATUS_LABEL[r.status] ?? r.status}</span>
