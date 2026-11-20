@@ -104,3 +104,4 @@ Database triggers stop users from changing protected columns (email, status, che
 Course details, schedules, outlines and campuses come from hikmahinstitute.org.pk. Still in [brackets] in
 `supabase/seed.sql`: course codes, fees and next intake dates. Event dates, seat limits and event summaries are
 sample data. Posters are photos from Hikmah's site, bundled in `apps/web/public/seed`.
+# hikmah
