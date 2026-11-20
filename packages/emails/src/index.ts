@@ -1,6 +1,7 @@
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { RegistrationEmail, type RegistrationEmailProps } from "./RegistrationEmail";
+import { FeedbackEmail } from "./FeedbackEmail";
 import { RequestNotificationEmail, RequestReceivedEmail, type RequestEmailProps } from "./RequestEmails";
 
 export { AuthCodeEmail } from "./AuthCodeEmail";
@@ -28,4 +29,19 @@ export async function renderRequestEmails(props: RequestEmailProps & { next: str
     notification: { subject: `New ${props.kindLabel} request: ${props.name}`, html: adminHtml, text: adminText },
     receipt: { subject: `We received your ${props.kindLabel} request`, html: ackHtml, text: ackText },
   };
+}
+
+export async function renderFeedbackEmail(props: { firstName: string; title: string; when?: string | null; url: string; logoUrl?: string }) {
+  const el = createElement(FeedbackEmail, props);
+  const [html, text] = await Promise.all([render(el), render(el, { plainText: true })]);
+  return { subject: `How was ${props.title}?`, html, text };
+}
+
+export { type InviteEmailProps } from "./InviteEmail";
+import { InviteEmail, type InviteEmailProps } from "./InviteEmail";
+
+export async function renderInviteEmail(props: InviteEmailProps & { subject?: string }) {
+  const el = createElement(InviteEmail, props);
+  const [html, text] = await Promise.all([render(el), render(el, { plainText: true })]);
+  return { subject: props.subject?.trim() || `You're invited: ${props.title}`, html, text };
 }

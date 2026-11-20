@@ -109,12 +109,31 @@ export type FormFieldRow = {
 export type RegistrationRow = {
   id: string; offering_id: string; user_id: string; status: RegistrationStatus; answers: Json;
   ticket_code: string | null; checked_in_at: string | null; checked_in_by: string | null; admin_notes: string | null;
-  submitted_at: string; updated_at: string;
+  submitted_at: string; updated_at: string; feedback_token: string;
 };
 
 export type RequestRow = {
   id: string; kind: RequestKind; status: RequestStatus; name: string; email: string | null; phone: string | null;
   payload: Json; user_id: string | null; admin_notes: string | null; handled_by: string | null; created_at: string; updated_at: string;
+};
+
+export type SiteSettingRow = { key: string; value: Json; updated_by: string | null; updated_at: string };
+
+export type FeedbackFormRow = {
+  offering_id: string; questions: Json; intro: string | null; is_open: boolean; sent_at: string | null; sent_count: number; sent_by: string | null; updated_at: string;
+};
+export type FeedbackResponseRow = { id: string; offering_id: string; registration_id: string; answers: Json; anonymous: boolean; created_at: string; updated_at: string };
+
+export type SegmentRow = { id: string; name: string; rules: Json; created_by: string | null; created_at: string; updated_at: string };
+export type CampaignRow = {
+  id: string; offering_id: string | null; segment_id: string | null; rules: Json; subject: string; message: string | null;
+  recipient_count: number; sent_count: number; sent_by: string | null; created_at: string;
+};
+export type CampaignRecipientRow = { campaign_id: string; user_id: string; email: string };
+export type PersonResult = {
+  user_id: string; full_name: string | null; email: string; phone: string | null; area: string | null;
+  occupation_type: OccupationType | null; gender: Gender | null; interests: string[]; email_opt_in: boolean;
+  whatsapp_opt_in: boolean; joined_at: string; registrations: number; last_registered_at: string | null;
 };
 
 export interface Database {
@@ -131,6 +150,12 @@ export interface Database {
       form_fields: Table<FormFieldRow, "offering_id" | "field_id" | "position">;
       registrations: Table<RegistrationRow, "offering_id" | "user_id">;
       requests: Table<RequestRow, "kind" | "name">;
+      site_settings: Table<SiteSettingRow, "key">;
+      feedback_forms: Table<FeedbackFormRow, "offering_id">;
+      feedback_responses: Table<FeedbackResponseRow, "offering_id" | "registration_id">;
+      segments: Table<SegmentRow, "name">;
+      campaigns: Table<CampaignRow, "subject">;
+      campaign_recipients: Table<CampaignRecipientRow, "campaign_id" | "user_id" | "email">;
     };
     Views: Record<string, never>;
     Functions: {
@@ -141,11 +166,19 @@ export interface Database {
       cancel_registration: { Args: { p_registration_id: string }; Returns: RegistrationRow };
       seats_taken: { Args: { p_offering_id: string }; Returns: number };
       is_staff: { Args: Record<string, never>; Returns: boolean };
+      feedback_form_for: {
+        Args: { p_token: string };
+        Returns: { offering_title: string; offering_subtitle: string | null; starts_at: string | null; venue: string | null; first_name: string | null; intro: string | null; questions: Json; is_open: boolean; answers: Json | null; anonymous: boolean | null }[];
+      };
+      submit_feedback: { Args: { p_token: string; p_answers: Json; p_anonymous: boolean }; Returns: boolean };
       submit_request: { Args: { p_kind: RequestKind; p_name: string; p_email: string | null; p_phone: string | null; p_payload: Json }; Returns: string };
       checkin_lookup: {
         Args: { p_offering_id: string; p_query: string };
         Returns: { registration_id: string; full_name: string | null; phone: string | null; status: RegistrationStatus; ticket_code: string | null; checked_in_at: string | null }[];
       };
+      people_search: { Args: { p_rules: Json }; Returns: PersonResult[] };
+      staff_list: { Args: Record<string, never>; Returns: { user_id: string; email: string; full_name: string | null; roles: AppRole[] }[] };
+      staff_set_role: { Args: { p_email: string; p_role: AppRole; p_grant: boolean }; Returns: string };
       checkin_counts: { Args: { p_offering_id: string }; Returns: { expected: number; arrived: number }[] };
       checkin_mark: {
         Args: { p_registration_id: string };

@@ -2,10 +2,11 @@ import type { ReactNode } from "react";
 import { ButtonLink, Footer, Header } from "@hikmah/ui";
 import { getCurrentUser } from "@/lib/auth";
 import { supabaseConfigured } from "@/lib/env";
+import { getSiteSettings, socialLinks } from "@/lib/settings";
 import { CONTACT, NAV } from "@/lib/site-content";
 
 export async function SiteShell({ children, current, overlayHeader }: { children: ReactNode; current?: string; overlayHeader?: boolean }) {
-  const user = await getCurrentUser();
+  const [user, site] = await Promise.all([getCurrentUser(), getSiteSettings()]);
   return (
     <div className="hk-page" style={{ position: "relative" }}>
       <Header
@@ -28,11 +29,11 @@ export async function SiteShell({ children, current, overlayHeader }: { children
         </div>
       )}
       <Footer
-        phone={CONTACT.phone}
-        email={CONTACT.email}
-        whatsapp={CONTACT.whatsapp}
+        phone={site.contact.phone}
+        email={site.contact.email}
+        whatsapp={site.contact.whatsapp}
         campuses={CONTACT.campuses}
-        socials={CONTACT.socials}
+        socials={socialLinks(site.contact)}
         learn={[{ href: "/courses", label: "Courses" }, { href: "/hifz", label: "Hifz Program" }, { href: "/events", label: "Events" }, { href: "/mentorship", label: "Mentorship Circle" }, { href: "/hikmah-at-work", label: "Hikmah at Work" }, { href: "/about", label: "About us" }]}
         campusImage="/home/campus.jpg"
       />

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
 import { WeekCarousel, type WeekItem } from "@/components/WeekCarousel";
 import { listOfferings, type OfferingWithType } from "@/lib/offerings";
-import { RIBBON, STATS, TALKS, TESTIMONIALS } from "@/lib/site-content";
+import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,8 @@ const TINTS = ["#F1F4F9", "#E6EEF8", "#EDF2F8"];
 const initials = (name: string) => name.replace(/^(Dr|Mufti|Maulana|Shaykh)\.?\s+/i, "").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
 export default async function HomePage() {
-  const [courses, allEvents] = await Promise.all([listOfferings("course"), listOfferings("event")]);
+  const [courses, allEvents, site] = await Promise.all([listOfferings("course"), listOfferings("event"), getSiteSettings()]);
+  const { hero, sections: on, stats: STATS, ribbon: RIBBON, partners, testimonials: TESTIMONIALS, talks: TALKS } = site;
   const now = Date.now();
   const events = allEvents
     .filter((e) => e.starts_at && new Date(e.ends_at ?? e.starts_at).getTime() > now)
@@ -49,20 +50,20 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="hm-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/home/hero.jpg" alt="A full hall listening to a talk at a Hikmah event" className="hm-hero__bg" />
+        <img src={hero.image} alt="A full hall listening to a talk at a Hikmah event" className="hm-hero__bg" />
         <div className="hm-hero__shade" />
         <div className="hm-hero__fade" />
         <svg aria-hidden="true" viewBox="0 0 200 200" className="hm-hero__pattern"><g fill="none" stroke="#FFFFFF" strokeWidth="0.8"><rect x="40" y="40" width="120" height="120" /><rect x="40" y="40" width="120" height="120" transform="rotate(45 100 100)" /><circle cx="100" cy="100" r="60" /><circle cx="100" cy="100" r="85" /><rect x="65" y="65" width="70" height="70" /><rect x="65" y="65" width="70" height="70" transform="rotate(45 100 100)" /></g></svg>
 
         <div className="hk-container hm-hero__inner">
           <div className="hm-hero__copy">
-            <span className="hm-eyebrow hm-eyebrow--dark">Ilm · Dawah · Islah · Khidmah</span>
-            <h1 className="hm-hero__title">Rediscover your deen, with <span>Hikmah.</span></h1>
+            <span className="hm-eyebrow hm-eyebrow--dark">{hero.eyebrow}</span>
+            <h1 className="hm-hero__title">{hero.title} {hero.highlight && <span>{hero.highlight}</span>}</h1>
             <div className="hm-ayah">
               <span lang="ar" dir="rtl" className="hm-ayah__ar">ادْعُ إِلَىٰ سَبِيلِ رَبِّكَ <span>بِالْحِكْمَةِ</span></span>
               <span className="hm-ayah__en">&ldquo;Invite to the way of your Lord with wisdom.&rdquo; <small>Surah An-Nahl, 16:125</small></span>
             </div>
-            <p className="hm-hero__lead">Classical Islamic scholarship, taught for students and working professionals in Karachi. Evenings and weekends, at our Sindhi Muslim Society and DHA campuses.</p>
+            <p className="hm-hero__lead">{hero.lead}</p>
             <div className="hm-hero__actions">
               <Link href="/courses" className="hm-hb hm-hb--accent">Explore courses →</Link>
               <Link href="/events" className="hm-hb hm-hb--outline">Attend an event</Link>
@@ -84,17 +85,26 @@ export default async function HomePage() {
       </section>
 
       {/* Stats */}
+      {on.stats && (
       <section className="hm-stats">
         <div className="hk-container hm-stats__grid">
           {STATS.map((s) => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}
         </div>
       </section>
+      )}
+
+      {on.partners && partners.length > 0 && (
+        <section className="hk-container pg-partners">
+          <span>Hikmah circles and workshops run at workplaces across Karachi</span>
+          <div>{partners.map((p) => <span key={p}>{p}</span>)}</div>
+        </section>
+      )}
 
       {/* This week */}
-      {week.length > 0 && <section className="hm-section"><WeekCarousel items={week} /></section>}
+      {on.thisWeek && week.length > 0 && <section className="hm-section"><WeekCarousel items={week} /></section>}
 
       {/* Flagship course */}
-      {flagship && (
+      {on.flagship && flagship && (
         <section className="hk-container hm-section">
           <div className="hm-split">
             <div className="hm-split__body">
@@ -115,14 +125,16 @@ export default async function HomePage() {
       )}
 
       {/* Ribbon */}
+      {on.ribbon && (
       <section className="hm-ribbon" aria-label="Highlights">
         <div className="hm-ribbon__track">
           {[...RIBBON, ...RIBBON].map((r, i) => <span key={i} aria-hidden={i >= RIBBON.length}>{r} <em>✦</em></span>)}
         </div>
       </section>
+      )}
 
       {/* More courses */}
-      {otherCourses.length > 0 && (
+      {on.courses && otherCourses.length > 0 && (
         <section className="hk-container" style={{ paddingTop: 44 }}>
           <div className="hm-split">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -145,6 +157,7 @@ export default async function HomePage() {
       )}
 
       {/* Community */}
+      {on.community && (
       <section className="hk-container hm-section hm-community">
         <h2 className="hm-h2" style={{ textAlign: "center" }}>A community built on<br />knowledge and khidmah</h2>
         <div className="hm-stack">
@@ -153,13 +166,15 @@ export default async function HomePage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/home/community.jpg" alt="Young attendees at a Hikmah talk" loading="lazy" />
             <div className="hm-stack__stats">
-              {[STATS[0]!, STATS[1]!, STATS[3]!].map((s) => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}
+              {[STATS[0], STATS[1], STATS[3]].filter((x): x is NonNullable<typeof x> => !!x).map((s) => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}
             </div>
           </div>
         </div>
       </section>
+      )}
 
       {/* Testimonials */}
+      {on.testimonials && (
       <section className="hm-section">
         <div className="hk-container hm-head"><h2 className="hm-h2">What our students<br />say about Hikmah</h2></div>
         <div className="hk-container hm-quotes">
@@ -173,8 +188,10 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Talks */}
+      {on.talks && (
       <section className="hk-container hm-section hm-talks-wrap">
         <h2 className="hm-h2" style={{ textAlign: "center" }}>Recent talks to<br />watch this week</h2>
         <div className="hm-talks">
@@ -192,6 +209,8 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+      )}
+
     </SiteShell>
   );
 }

@@ -1,0 +1,12 @@
+{
+  "name": "hikmah-tutorials",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "admin": "node record.mjs admin",
+    "student": "node record.mjs student"
+  },
+  "devDependencies": {
+    "playwright": "1.49.1"
+  }
+}

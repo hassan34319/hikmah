@@ -67,15 +67,27 @@ The confirmation page `/account/registrations/<id>` doubles as the QR ticket.
   Hikmah at Work invitations. These public forms need no account. Each submission emails
   `REQUESTS_NOTIFY_EMAIL` (default info@hikmahinstitute.org.pk), sends the person a receipt, and shows here
   with status (new, in progress, done), notes and CSV export.
+- **Feedback** (tab on each event): edit the questions (default: ratings, next topics, comments, come again),
+  then **Send** to everyone who registered or only to those who haven't answered. People answer from a
+  personal email link without signing in, optionally anonymously. Results show averages, bar charts and
+  comments; export to CSV. Sending is manual, for the events you choose.
+- **Homepage**: hero text and photo, stats, ribbon, partners, testimonials, YouTube talks, footer contact
+  and social links, and switches to show or hide each homepage section. Saved in `site_settings`.
 - **Door check-in** (`/admin/check-in`, phone friendly): scan QR tickets (Android Chrome) or search by
   ticket code, name or phone. Volunteers can use it without seeing anything else.
-
-Give someone a role in the SQL editor (role is `admin`, `volunteer` or `super_admin`):
-
-```sql
-insert into public.user_roles (user_id, role)
-select id, 'volunteer' from auth.users where email = 'person@example.com';
-```
+- **People** (`/admin/people`): everyone with a completed profile. Filter by:
+  - what they attended: registered for, checked in at (QR events only) or gave feedback on, specific events,
+    event types, a series name ("Feel Good Fridays"), a date range, and "at least N times";
+  - leave out: people already registered for an event, and applied for a course yes or no;
+  - who they are: search, area (partial names, comma separated), occupation, gender, age range, interests,
+    email and WhatsApp opt-ins.
+  Filters live in the URL. **Save as a group** stores the filters (not a fixed list), so new people who match
+  join automatically. **Invite this group** emails an event or course card with a Register button to everyone
+  in the group who opted in to emails, skipping anyone already registered; every invite is logged.
+  **Export** downloads the group as CSV. Click a name for their full history (registrations, check-ins,
+  feedback, invites received).
+- **Admins** (`/admin/admins`): see who has access. Super admins give or remove access by email
+  (volunteer, admin, super admin). The person must have signed up on the website first.
 
 ## Make yourself super admin
 
@@ -104,4 +116,3 @@ Database triggers stop users from changing protected columns (email, status, che
 Course details, schedules, outlines and campuses come from hikmahinstitute.org.pk. Still in [brackets] in
 `supabase/seed.sql`: course codes, fees and next intake dates. Event dates, seat limits and event summaries are
 sample data. Posters are photos from Hikmah's site, bundled in `apps/web/public/seed`.
-# hikmah

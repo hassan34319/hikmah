@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
-import { BOARD, COFOUNDERS, CONTACT, PATRON, PILLARS, STATS, TESTIMONIALS } from "@/lib/site-content";
+import { getSiteSettings } from "@/lib/settings";
+import { BOARD, COFOUNDERS, CONTACT, PATRON, PILLARS } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "About us",
   description: "Hikmah Institute is a nonprofit, nonpolitical educational institute in Karachi, spreading the teachings of Islam through Ilm, Dawah, Islah and Khidmah.",
 };
 
-export default function AboutPage() {
+export const revalidate = 300;
+
+export default async function AboutPage() {
+  const { stats: STATS, testimonials: TESTIMONIALS, contact } = await getSiteSettings();
   return (
     <SiteShell current="/about">
       {/* Hero */}
@@ -121,14 +125,14 @@ export default function AboutPage() {
             <h2>Two campuses in Karachi</h2>
             <p>Classes run on weeknights and weekends. Drop by, or message us and we&apos;ll help you find the right course.</p>
             <div className="hm-hero__actions">
-              <a href={CONTACT.whatsapp} target="_blank" rel="noreferrer" className="hm-hb hm-hb--accent">WhatsApp us →</a>
+              <a href={contact.whatsapp} target="_blank" rel="noreferrer" className="hm-hb hm-hb--accent">WhatsApp us →</a>
               <Link href="/courses" className="hm-hb hm-hb--outline">Explore courses</Link>
             </div>
           </div>
           <div className="ab-campuses">
             <div><strong>Main Campus</strong><span>{CONTACT.campuses[0]}, Karachi</span><a href="https://maps.app.goo.gl/p6NVEjvU899cKguW6" target="_blank" rel="noreferrer">Get directions →</a></div>
             <div><strong>DHA Campus</strong><span>{CONTACT.campuses[1]}, Karachi</span><a href="https://maps.app.goo.gl/CoFGGhRfKWkHJ88Q7" target="_blank" rel="noreferrer">Get directions →</a></div>
-            <div><strong>Contact</strong><span>{CONTACT.phone}</span><span>{CONTACT.email}</span></div>
+            <div><strong>Contact</strong><span>{contact.phone}</span><span>{contact.email}</span></div>
           </div>
         </div>
       </section>

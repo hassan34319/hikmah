@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/SiteShell";
 import { HIFZ } from "@/lib/programs-content";
-import { CONTACT, TESTIMONIALS } from "@/lib/site-content";
+import { getSiteSettings } from "@/lib/settings";
 import { HifzForm } from "./HifzForm";
 
 export const metadata: Metadata = {
@@ -9,7 +9,10 @@ export const metadata: Metadata = {
   description: "A full-time Hifz program for boys in Karachi that nurtures hearts, not just memorization: daily Hifz, tarbiyah, Seerah, sports and life skills.",
 };
 
-export default function HifzPage() {
+export const revalidate = 300;
+
+export default async function HifzPage() {
+  const { testimonials: TESTIMONIALS, contact } = await getSiteSettings();
   return (
     <SiteShell current="/courses">
       <section className="ab-hero">
@@ -62,7 +65,7 @@ export default function HifzPage() {
             <span className="hm-eyebrow">Register</span>
             <h2 className="hm-h2" style={{ margin: "10px 0 14px" }}>Register your child</h2>
             <p className="hm-muted">One form for the whole family: add each of your children, then your details. Tracks: Qaida, Nazra, Hifz and Girdaan.</p>
-            <p className="hm-muted">Questions? Call or WhatsApp {CONTACT.phone}.</p>
+            <p className="hm-muted">Questions? Call or WhatsApp {contact.phone}.</p>
           </div>
           <div className="hk-panel"><HifzForm /></div>
         </div>

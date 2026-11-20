@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/SiteShell";
-import { WORK_FAQ, WORK_FORMATS, WORK_PARTNERS, WORK_STEPS, WORK_THEMES } from "@/lib/programs-content";
+import { WORK_FAQ, WORK_FORMATS, WORK_STEPS, WORK_THEMES } from "@/lib/programs-content";
+import { getSiteSettings } from "@/lib/settings";
 import { InviteForm } from "./InviteForm";
 
 export const metadata: Metadata = {
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
 
 const GALLERY = [1, 3, 5, 2, 4, 6].map((n) => `/work/session-${n}.jpg`);
 
-export default function HikmahAtWorkPage() {
+export const revalidate = 300;
+
+export default async function HikmahAtWorkPage() {
+  const { partners } = await getSiteSettings();
   return (
     <SiteShell current="/hikmah-at-work">
       <section className="ab-hero">
@@ -30,10 +34,12 @@ export default function HikmahAtWorkPage() {
         </div>
       </section>
 
-      <section className="hk-container pg-partners">
-        <span>Organisations we&apos;ve worked with</span>
-        <div>{WORK_PARTNERS.map((p) => <span key={p}>{p}</span>)}</div>
-      </section>
+      {partners.length > 0 && (
+        <section className="hk-container pg-partners">
+          <span>Organisations we&apos;ve worked with</span>
+          <div>{partners.map((p) => <span key={p}>{p}</span>)}</div>
+        </section>
+      )}
 
       <section className="hk-container hm-section">
         <div className="hm-head"><div><span className="hm-eyebrow">Themes</span><h2 className="hm-h2" style={{ marginTop: 10 }}>What we talk about</h2></div></div>

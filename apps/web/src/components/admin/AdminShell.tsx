@@ -5,11 +5,14 @@ const NAV = [
   { href: "/admin", label: "Overview", admin: true },
   { href: "/admin/offerings", label: "Courses and events", admin: true },
   { href: "/admin/requests", label: "Requests", admin: true },
+  { href: "/admin/people", label: "People", admin: true },
   { href: "/admin/fields", label: "Question library", admin: true },
+  { href: "/admin/homepage", label: "Homepage", admin: true },
   { href: "/admin/check-in", label: "Door check-in", admin: false },
+  { href: "/admin/admins", label: "Admins", admin: true },
 ];
 
-const SOON = ["People", "Promote", "Admissions", "Homepage", "Admins"];
+const SOON = ["Admissions", "LMS"];
 
 export function AdminShell({ children, isAdmin, current }: { children: ReactNode; isAdmin: boolean; current?: string }) {
   return (
