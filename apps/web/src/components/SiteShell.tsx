@@ -33,7 +33,7 @@ export async function SiteShell({ children, current, overlayHeader }: { children
         whatsapp={CONTACT.whatsapp}
         campuses={CONTACT.campuses}
         socials={CONTACT.socials}
-        learn={[{ href: "/courses", label: "Courses" }, { href: "/events", label: "Events" }]}
+        learn={[{ href: "/courses", label: "Courses" }, { href: "/events", label: "Events" }, { href: "/about", label: "About us" }]}
         campusImage="/home/campus.jpg"
       />
     </div>
