@@ -4,6 +4,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type AppRole = "super_admin" | "admin" | "faculty" | "student" | "interviewer" | "volunteer";
+export type Gender = "male" | "female";
 export type OccupationType = "student" | "professional" | "both" | "other";
 export type OfferingKind = "course" | "event";
 export type OfferingStatus = "draft" | "published" | "closed" | "archived";
@@ -23,19 +24,20 @@ export type ProfileRow = {
   id: string;
   email: string;
   full_name: string | null;
+  /** WhatsApp number, the only phone we keep. */
   phone: string | null;
-  whatsapp: string | null;
+  gender: Gender | null;
+  /** Optional CNIC or B-Form, 12345-1234567-1. */
+  cnic: string | null;
   date_of_birth: string | null;
   occupation_type: OccupationType | null;
   university: string | null;
   degree: string | null;
-  year_of_study: string | null;
+  education_year: string | null;
   company: string | null;
   job_title: string | null;
   address_line: string | null;
   area: string | null;
-  city: string | null;
-  country: string | null;
   interests: string[];
   heard_from: string | null;
   email_opt_in: boolean;
@@ -131,6 +133,7 @@ export interface Database {
     Enums: {
       app_role: AppRole;
       occupation_type: OccupationType;
+      gender: Gender;
       offering_kind: OfferingKind;
       offering_status: OfferingStatus;
       registration_status: RegistrationStatus;

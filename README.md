@@ -15,15 +15,24 @@ Public website, admin dashboard and (later) LMS for Hikmah Institute, Karachi.
 
 1. Install: `pnpm install` (Node 20+, pnpm 10).
 2. Create a Supabase project at supabase.com (free plan is fine).
-3. Apply the database. Either:
-   - Supabase dashboard > SQL editor: run each file in `supabase/migrations` in order, then `supabase/seed.sql`, or
-   - Supabase CLI: `supabase link --project-ref <ref>` then `supabase db push` and run the seed.
+3. Apply the database with the Supabase CLI:
+   ```bash
+   supabase login
+   supabase init            # once; answer N to editor questions
+   supabase link --project-ref <project-id>
+   supabase db push --include-seed
+   ```
+   `seed.sql` is safe to run again: it updates the courses, events and posters instead of failing.
+   To re-run only the seed, paste `supabase/seed.sql` into the dashboard SQL editor.
 4. Auth settings in the Supabase dashboard:
    - Authentication > Providers > Email: enabled. "Confirm email" can stay on.
    - Authentication > Email Templates > **Magic Link**: replace the body so it sends the code, for example:
      `<h2>Your Hikmah sign in code</h2><p>Enter this code: <strong>{{ .Token }}</strong></p>`
      Without `{{ .Token }}` users get a link instead of a 6 digit code.
-   - Authentication > URL Configuration: site URL `http://localhost:3000` for now (the live domain later).
+   - Authentication > URL Configuration: site URL `http://localhost:3000`, and add `http://localhost:3000/**`
+     under Redirect URLs (needed for the sign in link). Use the live domain later.
+   - Until custom SMTP is connected, Supabase only sends to members of your Supabase organization and does not
+     let you edit templates. The site accepts the default sign in link as well as the 6 digit code.
    - For real launches set up custom SMTP (Resend) under Authentication > SMTP. The built in sender is rate limited.
 5. `cp apps/web/.env.example apps/web/.env.local` and fill in the project URL and publishable key (Project settings > API Keys).
 6. `pnpm dev:web` and open http://localhost:3000.
@@ -52,5 +61,6 @@ Database triggers stop users from changing protected columns (email, status, che
 
 ## Placeholders still to fill
 
-Everything in square brackets in `supabase/seed.sql`: course codes, fees, schedules, descriptions, intake dates,
-campus address and area, sample event summaries and speakers.
+Course details, schedules, outlines and campuses come from hikmahinstitute.org.pk. Still in [brackets] in
+`supabase/seed.sql`: course codes, fees and next intake dates. Event dates, seat limits and event summaries are
+sample data. Posters are photos from Hikmah's site, bundled in `apps/web/public/seed`.

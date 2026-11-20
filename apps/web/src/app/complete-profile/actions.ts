@@ -24,23 +24,22 @@ export async function saveProfile(_prev: ProfileState, form: FormData): Promise<
   if (!user) redirect("/sign-in?next=/complete-profile");
 
   const v = parsed.data;
-  const studying = v.occupation_type === "student" || v.occupation_type === "both";
   const working = v.occupation_type === "professional" || v.occupation_type === "both";
 
   const { error } = await supabase.from("profiles").update({
     full_name: v.full_name,
+    gender: v.gender,
+    cnic: v.cnic,
     phone: v.phone,
-    whatsapp: v.whatsapp_same ? v.phone : v.whatsapp,
     date_of_birth: v.date_of_birth,
     occupation_type: v.occupation_type,
-    university: studying ? v.university : null,
-    degree: studying ? v.degree : null,
-    year_of_study: studying ? v.year_of_study : null,
+    university: v.university,
+    degree: v.degree,
+    education_year: v.education_year,
     company: working ? v.company : null,
     job_title: working ? v.job_title : null,
     address_line: v.address_line,
     area: v.area,
-    city: v.city,
     interests: v.interests,
     heard_from: v.heard_from,
     email_opt_in: v.email_opt_in,
@@ -50,7 +49,9 @@ export async function saveProfile(_prev: ProfileState, form: FormData): Promise<
 
   if (error) {
     if (error.code === "23505") {
-      return { errors: { phone: "This phone number is already linked to another account." }, message: "Please fix the highlighted fields.", values: raw };
+      const field = error.message.includes("cnic") ? "cnic" : "phone";
+      const msg = field === "cnic" ? "This CNIC is already linked to another account." : "This WhatsApp number is already linked to another account.";
+      return { errors: { [field]: msg }, message: "Please fix the highlighted fields.", values: raw };
     }
     console.error("saveProfile", error.message);
     return { message: "We could not save your profile. Please try again.", values: raw };

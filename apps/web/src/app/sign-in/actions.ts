@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { supabaseConfigured } from "@/lib/env";
+import { SITE_URL, supabaseConfigured } from "@/lib/env";
 import { safeNext } from "@/lib/safe-next";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,9 +17,17 @@ export async function sendCode(_prev: SignInState, form: FormData): Promise<Sign
   if (!parsed.success) return { step: "email", error: parsed.error.issues[0]?.message };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({ email: parsed.data, options: { shouldCreateUser: true } });
+  const next = safeNext(form.get("next"));
+  const { error } = await supabase.auth.signInWithOtp({
+    email: parsed.data,
+    options: {
+      shouldCreateUser: true,
+      // Used when the email contains a link instead of a code (Supabase's default template).
+      emailRedirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
+  });
   if (error) return { step: "email", email: parsed.data, error: friendly(error.message) };
-  return { step: "code", email: parsed.data, info: `We sent a 6 digit code to ${parsed.data}.` };
+  return { step: "code", email: parsed.data, info: `We emailed ${parsed.data}. Enter the 6 digit code, or just click the sign in link in the email.` };
 }
 
 export async function verifyCode(prev: SignInState, form: FormData): Promise<SignInState> {

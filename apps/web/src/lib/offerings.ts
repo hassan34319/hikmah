@@ -36,13 +36,13 @@ export async function getOffering(slug: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("offerings")
-    .select(`${SELECT}, course_details(*), course_modules(position, title, description), venues(name, area, city)`)
+    .select(`${SELECT}, course_details(*), course_modules(position, title, description), venues(name, area, city, address, map_url)`)
     .eq("slug", slug)
     .maybeSingle();
   return data as unknown as (OfferingWithType & {
-    course_details: { duration_label: string | null; schedule_text: string | null; fee_text: string | null; intake_label: string | null } | null;
+    course_details: { duration_label: string | null; schedule_text: string | null; fee_text: string | null; intake_label: string | null; eligibility: string | null; outcomes: string[] } | null;
     course_modules: { position: number; title: string; description: string | null }[];
-    venues: { name: string; area: string | null; city: string } | null;
+    venues: { name: string; area: string | null; city: string; address: string | null; map_url: string | null } | null;
   }) | null;
 }
 

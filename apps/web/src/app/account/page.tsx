@@ -49,8 +49,8 @@ export default async function AccountPage() {
           <h2 style={{ fontSize: 20, marginBottom: 6 }}>My details</h2>
           <div>{profile?.full_name}</div>
           <div style={{ color: "var(--hk-muted)" }}>{profile?.email}</div>
-          <div style={{ color: "var(--hk-muted)" }}>{profile?.phone}</div>
-          <div style={{ color: "var(--hk-muted)" }}>{[profile?.area, profile?.city].filter(Boolean).join(", ")}</div>
+          <div style={{ color: "var(--hk-muted)" }}>{profile?.phone && `WhatsApp ${profile.phone}`}</div>
+          <div style={{ color: "var(--hk-muted)" }}>{profile?.area ? `${profile.area}, Karachi` : null}</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
             <ButtonLink href="/complete-profile" variant="ghost" size="sm">Edit details</ButtonLink>
             <form action="/auth/sign-out" method="post"><Button type="submit" variant="ghost" size="sm">Sign out</Button></form>

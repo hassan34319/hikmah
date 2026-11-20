@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button, Field, TextInput } from "@hikmah/ui";
 import { sendCode, verifyCode, type SignInState } from "./actions";
 
-export function SignInForm({ next }: { next: string }) {
+export function SignInForm({ next, linkError }: { next: string; linkError?: boolean }) {
   const [sendState, send, sending] = useActionState<SignInState, FormData>(sendCode, { step: "email" });
   const [verifyState, verify, verifying] = useActionState<SignInState, FormData>(verifyCode, { step: "code" });
 
@@ -15,6 +15,8 @@ export function SignInForm({ next }: { next: string }) {
   if (!onCodeStep) {
     return (
       <form action={send} className="hk-form">
+        {linkError && !error && <div className="hk-alert hk-alert--error">That sign in link has expired or was opened in a different browser. Ask for a new one below.</div>}
+        <input type="hidden" name="next" value={next} />
         <Field label="Email" htmlFor="email" error={error} hint="New here? The same code creates your account.">
           <TextInput id="email" name="email" type="email" autoComplete="email" inputMode="email" required defaultValue={email} />
         </Field>
@@ -37,6 +39,7 @@ export function SignInForm({ next }: { next: string }) {
       </form>
       <form action={send}>
         <input type="hidden" name="email" value={email} />
+        <input type="hidden" name="next" value={next} />
         <Button type="submit" variant="ghost" block disabled={sending}>{sending ? "Sending..." : "Resend code"}</Button>
       </form>
     </div>

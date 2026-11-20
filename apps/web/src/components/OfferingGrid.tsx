@@ -11,11 +11,12 @@ export function OfferingGrid({ items, empty }: { items: OfferingWithType[]; empt
           <OfferingCard
             key={o.id}
             href={`/${isEvent ? "events" : "courses"}/${o.slug}`}
-            tag={isEvent ? (o.offering_types?.name ?? "Event") : (o.subtitle ?? "Course")}
+            tag={isEvent ? [o.offering_types?.name, o.subtitle].filter(Boolean).join(" · ") : (o.subtitle ?? "Course")}
             title={o.title}
             summary={o.summary}
             meta={isEvent ? formatEventDate(o.starts_at) : null}
             imageUrl={o.poster_url}
+            cta={isEvent ? "Register" : "View course and apply"}
           />
         );
       })}
