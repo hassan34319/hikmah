@@ -25,7 +25,7 @@ Public website, admin dashboard and (later) LMS for Hikmah Institute, Karachi.
      Without `{{ .Token }}` users get a link instead of a 6 digit code.
    - Authentication > URL Configuration: site URL `http://localhost:3000` for now (the live domain later).
    - For real launches set up custom SMTP (Resend) under Authentication > SMTP. The built in sender is rate limited.
-5. `cp apps/web/.env.example apps/web/.env.local` and fill in the project URL and anon key (Project settings > API).
+5. `cp apps/web/.env.example apps/web/.env.local` and fill in the project URL and publishable key (Project settings > API Keys).
 6. `pnpm dev:web` and open http://localhost:3000.
 
 ## Make yourself super admin

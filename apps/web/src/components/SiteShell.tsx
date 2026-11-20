@@ -23,7 +23,7 @@ export async function SiteShell({ children, current }: { children: ReactNode; cu
       {!supabaseConfigured && (
         <div className="hk-container" style={{ paddingTop: 16 }}>
           <div className="hk-alert hk-alert--info">
-            Supabase is not connected yet. Copy apps/web/.env.example to .env.local and add the project URL and anon key.
+            Supabase is not connected yet. Copy apps/web/.env.example to .env.local and add the project URL and publishable key.
           </div>
         </div>
       )}
