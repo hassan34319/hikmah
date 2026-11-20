@@ -11,27 +11,17 @@ export const CONTACT = {
   ],
   socials: [
     { label: "YouTube", href: "https://www.youtube.com/@hikmahinstitute" }, // PLACEHOLDER: confirm channel URL
-    { label: "Instagram", href: "https://www.instagram.com/hikmahinst/?hl=en" }, // PLACEHOLDER
-    {
-      label: "LinkedIn",
-      href: "linkedin.com/company/hikmah-inst?trk=public_profile_experience-item_profile-section-card_subtitle-click&originalSubdomain=my",
-    }, // PLACEHOLDER
+    { label: "Instagram", href: "https://www.instagram.com/hikmahinst/" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/company/hikmah-inst/" },
   ],
 };
 
-/** Pages that still live on the current WordPress site until they are rebuilt here. */
+// Mentorship, Hikmah at Work and Hifz are added once the team confirms their content.
 export const NAV = [
+  { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/events", label: "Events" },
-  {
-    href: "https://hikmahinstitute.org.pk/mentorship-circle/",
-    label: "Mentorship",
-  },
-  {
-    href: "https://hikmahinstitute.org.pk/hikmah-at-workplace/",
-    label: "Hikmah at Work",
-  },
-  { href: "https://hikmahinstitute.org.pk/about-us/", label: "About" },
+  { href: "/about", label: "About" },
 ];
 
 export const STATS = [
@@ -39,14 +29,6 @@ export const STATS = [
   { value: "50", label: "at Feel Good Fridays each week" },
   { value: "10", label: "years of teaching" },
   { value: "2", label: "campuses in Karachi" },
-];
-
-export const PARTNERS = [
-  "[University]",
-  "[University]",
-  "[Company]",
-  "[Company]",
-  "[Company]",
 ];
 
 export const RIBBON = [
@@ -103,4 +85,38 @@ export const TALKS = [
     title: "The Strength to Be Gentle: Lessons in Mercy",
     speaker: "Maulana Khizer Khalid",
   },
+];
+
+// ---------- About page (from hikmahinstitute.org.pk/about-us) ----------
+export const PILLARS = [
+  { name: "Ilm", ar: "عِلْم", text: "Authentic Islamic knowledge rooted in the Qur'an and Sunnah." },
+  { name: "Dawah", ar: "دَعْوَة", text: "Calling towards Allah with wisdom, clarity and compassion." },
+  { name: "Islah", ar: "إِصْلَاح", text: "Personal and societal reform through spiritual and moral development." },
+  { name: "Khidmah", ar: "خِدْمَة", text: "Serving humanity as a responsibility of faith." },
+];
+
+const PLACEHOLDER_PHOTO = "/people/placeholder.svg"; // PLACEHOLDER: swap for real photos when the team sends them
+
+export const PATRON = {
+  name: "Mufti Muhammad Taqi Usmani",
+  role: "Patron",
+  photo: PLACEHOLDER_PHOTO,
+  bio: [
+    "Born in 1943 in Deoband, India, Mufti Muhammad Taqi Usmani is one of the most respected scholars of the Muslim world, known for his work in Hadith, Fiqh, Islamic economics and Tasawwuf.",
+    "He served on the Shariat Appellate Bench of the Supreme Court of Pakistan from 1982 to 2002, chairs the International Shariah Council of AAOIFI, is Vice President of Darul Uloom Karachi, and has authored more than 60 books.",
+  ],
+};
+
+export const BOARD = [
+  { name: "Dr. Zeeshan Ahmed", photo: PLACEHOLDER_PHOTO, bio: "Rector and Dean, and Associate Professor at the Karachi School of Business and Leadership (KSBL). More than 20 years in teaching, training and consulting; PhD in Finance from Mississippi State University, CFA, and has passed the CPA examinations." },
+  { name: "Mufti Umair Feroz", photo: PLACEHOLDER_PHOTO, bio: "Has taught Dars-e-Nizami for over 16 years, serves at the Dar-ul-Iftaa of Jamia Dar-ul-Uloom Karachi, and manages a pharmaceutical company." },
+  { name: "Mufti Muhammad Zahid Sangharwi", photo: PLACEHOLDER_PHOTO, bio: "Head of Shariah Compliance at Pak-Qatar Family Takaful, Resident Shariah Adviser for Soneri Bank, and conducts Dars-e-Quran and Hadith sessions." },
+  { name: "Dr. Amanullah Kassim", photo: PLACEHOLDER_PHOTO, bio: "Chairman of Macter International Limited and of the All Pakistan Textile Mills Association, and president of the Zubaida Machiyara Trust, which runs over 45 clinics in Karachi." },
+  { name: "Shabbir Kassim", photo: PLACEHOLDER_PHOTO, bio: "[Bio to be added]" },
+];
+
+export const COFOUNDERS = [
+  { name: "Maulana Shahzaib Aijaz", photo: "/people/shahzaib-aijaz.jpg", bio: "CEO and Director in the non-profit sector." },
+  { name: "Maulana Khizer Khalid", photo: "/people/khizer-khalid.jpg", bio: "Entrepreneur and business owner, and senior faculty at Hikmah Institute." },
+  { name: "Saad Jafri", photo: "/people/saad-jafri.jpg", bio: "Entrepreneur and business owner." },
 ];
