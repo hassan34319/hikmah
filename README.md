@@ -55,6 +55,28 @@ until seats run out, then waitlisted), creates a QR ticket code when the event h
 double registration. Cancelling (`cancel_registration`) frees the seat and moves the first waitlisted person up.
 The confirmation page `/account/registrations/<id>` doubles as the QR ticket.
 
+## Admin dashboard (`/admin`)
+
+- **Overview**: open registrations with seats filled, new this week, things that need attention.
+- **Courses and events**: create, edit, publish or unpublish; poster upload; course fee, batches, outline.
+- **Registration form** per course or event: pick questions from the library, reorder, required or optional,
+  or write a new question. Questions marked "From profile" fill in automatically.
+- **Responses**: everyone who registered with full details and answers, bulk status changes (attended,
+  confirmed, waitlist, cancel), admin notes, and Export to Excel (CSV).
+- **Requests**: Hifz registrations (one parent, several children), Mentorship Circle applications and
+  Hikmah at Work invitations. These public forms need no account. Each submission emails
+  `REQUESTS_NOTIFY_EMAIL` (default info@hikmahinstitute.org.pk), sends the person a receipt, and shows here
+  with status (new, in progress, done), notes and CSV export.
+- **Door check-in** (`/admin/check-in`, phone friendly): scan QR tickets (Android Chrome) or search by
+  ticket code, name or phone. Volunteers can use it without seeing anything else.
+
+Give someone a role in the SQL editor (role is `admin`, `volunteer` or `super_admin`):
+
+```sql
+insert into public.user_roles (user_id, role)
+select id, 'volunteer' from auth.users where email = 'person@example.com';
+```
+
 ## Make yourself super admin
 
 After signing in once, run in the SQL editor:

@@ -136,6 +136,7 @@ export default async function HomePage() {
                     <span><strong>{c.title}</strong><span className="hm-muted"> · {c.subtitle}</span></span><span aria-hidden="true">→</span>
                   </Link>
                 ))}
+                <Link href="/hifz"><span><strong>Hifz Program</strong><span className="hm-muted"> · boys, full time</span></span><span aria-hidden="true">→</span></Link>
               </div>
               <Link href="/courses" className="hk-pill hk-pill--dark">View all courses <span className="hk-pill__arrow">→</span></Link>
             </div>

@@ -5,6 +5,8 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type AppRole = "super_admin" | "admin" | "faculty" | "student" | "interviewer" | "volunteer";
 export type Gender = "male" | "female";
+export type RequestKind = "mentorship" | "corporate" | "hifz" | "contact";
+export type RequestStatus = "new" | "in_progress" | "done" | "archived";
 export type OccupationType = "student" | "professional" | "both" | "other";
 export type OfferingKind = "course" | "event";
 export type OfferingStatus = "draft" | "published" | "closed" | "archived";
@@ -110,6 +112,11 @@ export type RegistrationRow = {
   submitted_at: string; updated_at: string;
 };
 
+export type RequestRow = {
+  id: string; kind: RequestKind; status: RequestStatus; name: string; email: string | null; phone: string | null;
+  payload: Json; user_id: string | null; admin_notes: string | null; handled_by: string | null; created_at: string; updated_at: string;
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -123,6 +130,7 @@ export interface Database {
       fields: Table<FieldRow, "key" | "label" | "type">;
       form_fields: Table<FormFieldRow, "offering_id" | "field_id" | "position">;
       registrations: Table<RegistrationRow, "offering_id" | "user_id">;
+      requests: Table<RequestRow, "kind" | "name">;
     };
     Views: Record<string, never>;
     Functions: {
@@ -132,11 +140,24 @@ export interface Database {
       register_for_offering: { Args: { p_slug: string; p_answers: Json }; Returns: RegistrationRow };
       cancel_registration: { Args: { p_registration_id: string }; Returns: RegistrationRow };
       seats_taken: { Args: { p_offering_id: string }; Returns: number };
+      is_staff: { Args: Record<string, never>; Returns: boolean };
+      submit_request: { Args: { p_kind: RequestKind; p_name: string; p_email: string | null; p_phone: string | null; p_payload: Json }; Returns: string };
+      checkin_lookup: {
+        Args: { p_offering_id: string; p_query: string };
+        Returns: { registration_id: string; full_name: string | null; phone: string | null; status: RegistrationStatus; ticket_code: string | null; checked_in_at: string | null }[];
+      };
+      checkin_counts: { Args: { p_offering_id: string }; Returns: { expected: number; arrived: number }[] };
+      checkin_mark: {
+        Args: { p_registration_id: string };
+        Returns: { full_name: string | null; status: RegistrationStatus; checked_in_at: string; already: boolean }[];
+      };
     };
     Enums: {
       app_role: AppRole;
       occupation_type: OccupationType;
       gender: Gender;
+      request_kind: RequestKind;
+      request_status: RequestStatus;
       offering_kind: OfferingKind;
       offering_status: OfferingStatus;
       registration_status: RegistrationStatus;

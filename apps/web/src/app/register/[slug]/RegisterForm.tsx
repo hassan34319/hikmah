@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Button, Field, TextInput } from "@hikmah/ui";
+import { keepValuesOnSubmit } from "@/components/PublicForm";
 import type { FormFieldDef } from "@/lib/forms";
 import { register, type RegisterState } from "./actions";
 
@@ -13,7 +14,7 @@ export function RegisterForm({ slug, questions, submitLabel, note }: {
   const err = state.errors ?? {};
 
   return (
-    <form action={action} className="hk-form" noValidate>
+    <form onSubmit={keepValuesOnSubmit(action)} className="hk-form" noValidate>
       <input type="hidden" name="slug" value={slug} />
       {state.message && (
         <div className="hk-alert hk-alert--error" role="alert">

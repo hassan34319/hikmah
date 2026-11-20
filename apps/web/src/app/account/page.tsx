@@ -19,12 +19,14 @@ export default async function AccountPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in?next=/account");
 
-  const [{ data: profile }, { data: regs }] = await Promise.all([
+  const [{ data: profile }, { data: regs }, { data: roles }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("registrations")
       .select("id, status, submitted_at, offerings(slug, title, starts_at, offering_types(kind))")
       .eq("user_id", user.id).order("submitted_at", { ascending: false }),
+    supabase.from("user_roles").select("role").eq("user_id", user.id),
   ]);
+  const staff = (roles ?? []).some((r) => ["super_admin", "admin", "volunteer"].includes(r.role));
   type Reg = { id: string; status: string; submitted_at: string; offerings: { slug: string; title: string; starts_at: string | null; offering_types: { kind: string } | null } | null };
   const registrations = (regs ?? []) as unknown as Reg[];
 
@@ -53,6 +55,7 @@ export default async function AccountPage() {
           <div style={{ color: "var(--hk-muted)" }}>{profile?.area ? `${profile.area}, Karachi` : null}</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
             <ButtonLink href="/complete-profile" variant="ghost" size="sm">Edit details</ButtonLink>
+            {staff && <ButtonLink href="/admin" size="sm">Admin dashboard</ButtonLink>}
             <form action="/auth/sign-out" method="post"><Button type="submit" variant="ghost" size="sm">Sign out</Button></form>
           </div>
         </div>

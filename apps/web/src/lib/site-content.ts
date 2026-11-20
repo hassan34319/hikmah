@@ -16,11 +16,12 @@ export const CONTACT = {
   ],
 };
 
-// Mentorship, Hikmah at Work and Hifz are added once the team confirms their content.
 export const NAV = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/events", label: "Events" },
+  { href: "/mentorship", label: "Mentorship" },
+  { href: "/hikmah-at-work", label: "Hikmah at Work" },
   { href: "/about", label: "About" },
 ];
 
