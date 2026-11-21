@@ -95,7 +95,7 @@ for (const [i, ch] of mod.chapters.entries()) {
   console.log(`  ${n}. ${ch.title}`);
   d.chapter(`${n}. ${ch.title}`, ch.sub ?? '');
   try {
-    await ch.run({ page, d, BASE });
+    await ch.run({ page, d, BASE, ctx, AUTH });
     await d.wait(1200);
   } catch (e) {
     console.error(`     ✗ chapter ${n} stopped: ${e.message.split('\n')[0]}`);

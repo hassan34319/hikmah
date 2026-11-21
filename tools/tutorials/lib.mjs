@@ -93,6 +93,8 @@ export function makeDirector(page, t0, { inbox } = {}) {
 
   return {
     marks, wait: hold, now,
+    /** Save a value for the editor (e.g. a student ID to show in an email). */
+    note(key, value) { marks.push({ t: now(), type: 'note', key, value }); },
     /** Plus-address of the demo inbox: email('hk.student') -> you+hk.student@gmail.com */
     email(tag) { const [u, dom] = inbox.split('@'); return `${u}+${tag}@${dom}`; },
     chapter(title, sub = '') { marks.push({ t: now(), type: 'chapter', title, sub }); },
