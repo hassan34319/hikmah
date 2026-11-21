@@ -86,6 +86,18 @@ The confirmation page `/account/registrations/<id>` doubles as the QR ticket.
   in the group who opted in to emails, skipping anyone already registered; every invite is logged.
   **Export** downloads the group as CSV. Click a name for their full history (registrations, check-ins,
   feedback, invites received).
+- **Admissions** (Admissions tab on each course): every course application gets a pipeline.
+  1. **Send the test**: tick applicants, and they get an emailed link to a 15-minute admission test: five
+     mini-games (pattern grid, number sequences, odd one out, memory flash, speed logic) generated fresh for
+     each applicant, timed per puzzle, scored on the server, then a "Why Hikmah?" essay with a no-AI pledge.
+     Leaving the test window is counted and flagged.
+  2. **Invite to interview**: tick applicants or invite everyone above a cut-off score. Add interview slots
+     (day, time range, every N minutes, campus) first; applicants book a slot from their email link.
+  3. **Interviews** (`/admin/interviews`): interviewers (role `interviewer`) see booked interviews in time
+     order with the test breakdown, essay and answers, and give a score out of 10 with notes.
+  4. **Decide and notify**: mark Selected (with batch and campus), Waitlisted or Not selected, then send the
+     decision emails. Selected applicants get a student ID like `HKM-27-DN-0042` (intake year, course code,
+     running number). Set the intake year and essay question under Settings on the Admissions tab.
 - **Admins** (`/admin/admins`): see who has access. Super admins give or remove access by email
   (volunteer, admin, super admin). The person must have signed up on the website first.
 

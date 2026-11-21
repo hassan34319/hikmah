@@ -9,6 +9,8 @@ export type StaffContext = {
   userId: string;
   roles: AppRole[];
   isAdmin: boolean;
+  isInterviewer: boolean;
+  isVolunteer: boolean;
 };
 
 /** Signed-in user with an admin or volunteer role, or null. */
@@ -20,14 +22,23 @@ export async function getStaff(): Promise<StaffContext | null> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
   const roles = (data ?? []).map((r) => r.role);
   const isAdmin = roles.includes("super_admin") || roles.includes("admin");
-  if (!isAdmin && !roles.includes("volunteer")) return null;
-  return { supabase, userId: user.id, roles, isAdmin };
+  const isInterviewer = isAdmin || roles.includes("interviewer");
+  const isVolunteer = roles.includes("volunteer");
+  if (!isAdmin && !isVolunteer && !isInterviewer) return null;
+  return { supabase, userId: user.id, roles, isAdmin, isInterviewer, isVolunteer };
 }
 
 /** For admin-only pages and actions. The database enforces the same rule through RLS. */
 export async function requireAdmin() {
   const staff = await getStaff();
   if (!staff?.isAdmin) redirect("/admin/not-allowed");
+  return staff;
+}
+
+/** Interviewers (and admins) for the interview pages. */
+export async function requireInterviewer() {
+  const staff = await getStaff();
+  if (!staff?.isInterviewer) redirect("/admin/not-allowed");
   return staff;
 }
 

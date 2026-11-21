@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOverview() {
   const staff = await requireStaff();
-  if (!staff.isAdmin) redirect("/admin/check-in");
+  if (!staff.isAdmin) redirect(staff.isInterviewer ? "/admin/interviews" : "/admin/check-in");
   const { supabase } = staff;
 
   const now = new Date();

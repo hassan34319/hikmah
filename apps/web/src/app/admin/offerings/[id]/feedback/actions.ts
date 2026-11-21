@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { renderFeedbackEmail } from "@hikmah/emails";
 import type { Json } from "@hikmah/db";
 import { requireAdmin } from "@/lib/admin";
-import { emailLogoUrl, sendEmailBatch } from "@/lib/email";
+import { emailLogoUrl, lastEmailError, sendEmailBatch } from "@/lib/email";
 import { SITE_URL } from "@/lib/env";
 import { DEFAULT_FEEDBACK, parseQuestions, slugKey, type FeedbackQuestion } from "@/lib/feedback";
 import { fmtDate } from "@/lib/time";
@@ -62,7 +62,7 @@ export async function sendFeedbackEmails(_prev: FbState, form: FormData): Promis
   const sent = await sendEmailBatch(emails);
   await supabase.from("feedback_forms").update({ sent_at: new Date().toISOString(), sent_by: userId, sent_count: (existing?.sent_count ?? 0) + sent, is_open: true }).eq("offering_id", offeringId);
   revalidatePath(`/admin/offerings/${offeringId}/feedback`);
-  if (sent === 0) return { message: `Prepared ${recipients.length} emails but none were sent. Check RESEND_API_KEY.` };
+  if (sent === 0) return { message: `Prepared ${recipients.length} emails but none were sent: ${lastEmailError ?? "unknown error"}` };
   return { ok: true, message: `Sent to ${sent} people.` };
 }
 

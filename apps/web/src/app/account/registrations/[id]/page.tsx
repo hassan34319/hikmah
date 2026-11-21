@@ -8,6 +8,7 @@ import { googleCalendarUrl } from "@/lib/calendar";
 import { supabaseConfigured } from "@/lib/env";
 import { formatEventDate } from "@/lib/offerings";
 import { offeringWhere } from "@/lib/registration";
+import { createClient } from "@/lib/supabase/server";
 import { cancelRegistration } from "./actions";
 import { getMyRegistration } from "./data";
 
@@ -35,6 +36,7 @@ export default async function RegistrationPage({ params, searchParams }: {
   const where = offeringWhere(o);
   const when = formatEventDate(o.starts_at);
   const status = STATUS[r.status] ?? STATUS.submitted!;
+  const admission = isCourse ? (await (await createClient()).from("admissions").select("test_token, stage").eq("registration_id", r.id).maybeSingle()).data : null;
   const active = ["confirmed", "waitlisted", "submitted"].includes(r.status);
   const showTicket = r.ticket_code && r.status === "confirmed";
   const qrSvg = showTicket ? await QRCode.toString(r.ticket_code!, { type: "svg", margin: 1, width: 240, color: { dark: "#0A1628", light: "#FFFFFF" } }) : null;
@@ -79,6 +81,12 @@ export default async function RegistrationPage({ params, searchParams }: {
                   <div><dt>{isCourse ? "Applied" : "Registered"}</dt><dd>{formatEventDate(r.submitted_at)}</dd></div>
                 </dl>
               </dl>
+
+              {admission && (
+                <Link href={`/admissions/${admission.test_token}`} className="hk-btn hk-btn--primary hk-btn--sm" style={{ justifySelf: "start" }}>
+                  {admission.stage === "test_invited" ? "Take the admission test" : admission.stage === "interview_invited" ? "Book your interview" : "Admission status"} →
+                </Link>
+              )}
 
               {active && !isCourse && o.starts_at && (
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

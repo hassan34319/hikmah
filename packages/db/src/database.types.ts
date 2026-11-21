@@ -91,8 +91,21 @@ export type OfferingRow = {
 export type CourseDetailsRow = {
   offering_id: string; code: string | null; duration_label: string | null; duration_months: number | null;
   level: string | null; schedule_text: string | null; fee_text: string | null; eligibility: string | null;
-  intake_label: string | null; outcomes: string[];
+  intake_label: string | null; outcomes: string[]; intake_year: number | null; essay_prompt: string;
 };
+
+export type AdmissionStage = "applied" | "test_invited" | "test_done" | "interview_invited" | "interviewed" | "selected" | "waitlisted" | "not_selected";
+export type GameDetail = Record<string, { correct: number; total: number; points: number; max: number }>;
+export type AdmissionRow = {
+  id: string; registration_id: string; offering_id: string; user_id: string; stage: AdmissionStage; test_token: string;
+  test_invited_at: string | null; test_started_at: string | null; test_submitted_at: string | null; test_score: number | null;
+  test_detail: Json; tab_switches: number; essay: string | null; pledge: boolean; interview_invited_at: string | null;
+  slot_id: string | null; interview_score: number | null; interview_notes: string | null; interviewer_id: string | null;
+  interviewed_at: string | null; batch: string | null; campus: string | null; student_id: string | null; decided_at: string | null;
+  decision_sent_at: string | null; admin_notes: string | null; created_at: string; updated_at: string;
+};
+export type InterviewSlotRow = { id: string; offering_id: string; starts_at: string; minutes: number; venue_id: string | null; capacity: number; created_at: string };
+export type TestItem = { item_id: string; game: string; level: number; limit_s: number; payload: Json; pos: number; total: number; score: number };
 
 export type CourseModuleRow = { id: string; offering_id: string; position: number; title: string; description: string | null };
 
@@ -154,6 +167,8 @@ export interface Database {
       feedback_forms: Table<FeedbackFormRow, "offering_id">;
       feedback_responses: Table<FeedbackResponseRow, "offering_id" | "registration_id">;
       segments: Table<SegmentRow, "name">;
+      admissions: Table<AdmissionRow, "registration_id" | "offering_id" | "user_id">;
+      interview_slots: Table<InterviewSlotRow, "offering_id" | "starts_at">;
       campaigns: Table<CampaignRow, "subject">;
       campaign_recipients: Table<CampaignRecipientRow, "campaign_id" | "user_id" | "email">;
     };
@@ -176,6 +191,17 @@ export interface Database {
         Args: { p_offering_id: string; p_query: string };
         Returns: { registration_id: string; full_name: string | null; phone: string | null; status: RegistrationStatus; ticket_code: string | null; checked_in_at: string | null }[];
       };
+      admission_test_info: { Args: { p_token: string }; Returns: { course: string; stage: AdmissionStage; started: boolean; submitted: boolean; total: number; answered: number; essay_prompt: string; first_name: string | null }[] };
+      admission_test_start: { Args: { p_token: string }; Returns: number };
+      admission_test_next: { Args: { p_token: string }; Returns: TestItem[] };
+      admission_test_answer: { Args: { p_token: string; p_item: string; p_response: Json }; Returns: { correct: boolean; points: number }[] };
+      admission_test_flag: { Args: { p_token: string }; Returns: undefined };
+      admission_test_submit: { Args: { p_token: string; p_essay: string; p_pledge: boolean }; Returns: number };
+      interview_slots_for: { Args: { p_token: string }; Returns: { slot_id: string; starts_at: string; minutes: number; venue: string | null; seats_left: number; mine: boolean }[] };
+      interview_book: { Args: { p_token: string; p_slot: string }; Returns: string };
+      interview_record: { Args: { p_admission: string; p_score: number; p_notes: string }; Returns: undefined };
+      admission_assign_student_id: { Args: { p_admission: string }; Returns: string };
+      is_interviewer: { Args: Record<string, never>; Returns: boolean };
       people_search: { Args: { p_rules: Json }; Returns: PersonResult[] };
       staff_list: { Args: Record<string, never>; Returns: { user_id: string; email: string; full_name: string | null; roles: AppRole[] }[] };
       staff_set_role: { Args: { p_email: string; p_role: AppRole; p_grant: boolean }; Returns: string };
@@ -187,6 +213,7 @@ export interface Database {
     };
     Enums: {
       app_role: AppRole;
+      admission_stage: AdmissionStage;
       occupation_type: OccupationType;
       gender: Gender;
       request_kind: RequestKind;

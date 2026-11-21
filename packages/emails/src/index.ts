@@ -45,3 +45,12 @@ export async function renderInviteEmail(props: InviteEmailProps & { subject?: st
   const [html, text] = await Promise.all([render(el), render(el, { plainText: true })]);
   return { subject: props.subject?.trim() || `You're invited: ${props.title}`, html, text };
 }
+
+export { type AdmissionEmailKind, type AdmissionEmailProps, admissionSubject } from "./AdmissionEmails";
+import { AdmissionEmail, admissionSubject as admSubject, type AdmissionEmailProps as AdmProps } from "./AdmissionEmails";
+
+export async function renderAdmissionEmail(props: AdmProps) {
+  const el = createElement(AdmissionEmail, props);
+  const [html, text] = await Promise.all([render(el), render(el, { plainText: true })]);
+  return { subject: admSubject(props.kind, props.course), html, text };
+}

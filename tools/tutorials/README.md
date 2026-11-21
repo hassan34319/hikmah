@@ -28,3 +28,9 @@ Send `out/<name>.webm` and `out/<name>.marks.json` (and any `-error.png`) for ed
 ## Afterwards
 Run `supabase/demo/demo-cleanup.sql` in the SQL editor to remove all demo data, the student
 and parent accounts, and anything the recordings created.
+
+## Edit
+```
+python3 edit.py out/admin.webm --title "Hikmah Admin Guide" --sub "Everything you can do in the dashboard"
+```
+Writes out/final/admin.mp4 plus one short clip per chapter.

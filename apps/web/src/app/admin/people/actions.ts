@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { renderInviteEmail } from "@hikmah/emails";
 import type { PersonResult } from "@hikmah/db";
 import { requireAdmin } from "@/lib/admin";
-import { emailLogoUrl, sendEmailBatch } from "@/lib/email";
+import { emailLogoUrl, lastEmailError, sendEmailBatch } from "@/lib/email";
 import { SITE_URL } from "@/lib/env";
 import { asJson, paramsFromRules, toQuery, type PeopleRules } from "@/lib/people";
 import { fmtDate } from "@/lib/time";
@@ -84,6 +84,6 @@ export async function sendInvite(_prev: InviteState, form: FormData): Promise<In
     for (let i = 0; i < rows.length; i += 500) await supabase.from("campaign_recipients").insert(rows.slice(i, i + 500));
   }
   revalidatePath("/admin/people");
-  if (sent === 0) return { message: `Prepared ${list.length} invites but none were sent. Check RESEND_API_KEY.` };
+  if (sent === 0) return { message: `Prepared ${list.length} invites but none were sent: ${lastEmailError ?? "unknown error"}` };
   return { ok: true, message: `Invite sent to ${sent} ${sent === 1 ? "person" : "people"} for ${o.title}.` };
 }

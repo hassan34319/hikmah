@@ -8,14 +8,14 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Door check-in" };
 
 export default async function CheckInIndex() {
-  const { supabase, isAdmin } = await requireStaff();
+  const { supabase, isAdmin, roles } = await requireStaff();
   const from = new Date(Date.now() - 12 * 3600_000).toISOString();
   const { data } = await supabase.from("offerings")
     .select("id, title, subtitle, starts_at, qr_tickets_enabled, offering_types!inner(kind)")
     .eq("offering_types.kind", "event").eq("status", "published").gte("starts_at", from)
     .order("starts_at").limit(20);
   return (
-    <AdminShell isAdmin={isAdmin} current="/admin/check-in">
+    <AdminShell isAdmin={isAdmin} roles={roles} current="/admin/check-in">
       <AdminHeader title="Door check-in" sub="Pick the event happening now. Works best on a phone." />
       <section className="ad-card">
         <div className="ad-list">

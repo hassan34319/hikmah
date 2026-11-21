@@ -3,20 +3,26 @@ import { Resend } from "resend";
 import { SITE_URL } from "./env";
 
 const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.EMAIL_FROM ?? "Hikmah Institute <no-reply@hikmahinstitute.org.pk>";
+/** Tolerates values pasted with surrounding quotes or spaces (common in hosting dashboards). */
+const from = (process.env.EMAIL_FROM ?? "").trim().replace(/^(['"])(.*)\1$/, "$2").trim() || "Hikmah Institute <no-reply@hikmahinstitute.org.pk>";
 /** The site's own logo once deployed. On localhost, emails fall back to a hosted logo (email apps cannot load localhost). */
 export const emailLogoUrl = process.env.EMAIL_LOGO_URL || (/localhost|127\.0\.0\.1/.test(SITE_URL) ? undefined : `${SITE_URL}/logo.png`);
+
+/** The last error Resend returned (or why nothing was sent), shown to admins so problems are easy to fix. */
+export let lastEmailError: string | null = null;
 
 /** Sends through Resend. Never throws: a failed email must not undo a registration. */
 export async function sendEmail(msg: { to: string; subject: string; html: string; text: string }) {
   if (!apiKey) {
     console.info(`[email skipped: RESEND_API_KEY not set] to=${msg.to} subject="${msg.subject}"`);
+    lastEmailError = "RESEND_API_KEY is not set on the server.";
     return { ok: false as const, skipped: true };
   }
   try {
     const { error } = await new Resend(apiKey).emails.send({ from, ...msg });
     if (error) {
       console.error("[email failed]", error.message);
+      lastEmailError = error.message;
       return { ok: false as const };
     }
     return { ok: true as const };
@@ -30,6 +36,7 @@ export async function sendEmail(msg: { to: string; subject: string; html: string
 export async function sendEmailBatch(msgs: { to: string; subject: string; html: string; text: string }[]) {
   if (!apiKey) {
     console.info(`[email batch skipped: RESEND_API_KEY not set] ${msgs.length} emails`);
+    lastEmailError = "RESEND_API_KEY is not set on the server.";
     return 0;
   }
   const resend = new Resend(apiKey);
@@ -38,10 +45,11 @@ export async function sendEmailBatch(msgs: { to: string; subject: string; html: 
     const chunk = msgs.slice(i, i + 100).map((m) => ({ from, ...m }));
     try {
       const { error } = await resend.batch.send(chunk);
-      if (error) console.error("[email batch failed]", error.message);
+      if (error) { console.error("[email batch failed]", error.message); lastEmailError = error.message; }
       else sent += chunk.length;
     } catch (e) {
       console.error("[email batch failed]", e);
+      lastEmailError = e instanceof Error ? e.message : String(e);
     }
   }
   return sent;

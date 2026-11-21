@@ -129,6 +129,7 @@ export function OfferingEditor({ data, types, venues, saved }: {
                 <button name="intent" value="draft" className="hk-btn hk-btn--ghost hk-btn--block" disabled={pending}>Save draft</button>
               </>
             )}
+            {data.id && <CopyLink path={`/${isCourse ? "courses" : "events"}/${data.slug}`} live={live} />}
             {data.id && <Link href={`/${isCourse ? "courses" : "events"}/${data.slug}`} target="_blank" className="ad-muted" style={{ textAlign: "center" }}>View on website ↗</Link>}
           </div>
         </section>
@@ -168,5 +169,21 @@ export function OfferingEditor({ data, types, venues, saved }: {
         </section>
       </div>
     </form>
+  );
+}
+
+/** Copies the public page link, ready to paste into WhatsApp or social media. */
+function CopyLink({ path, live }: { path: string; live: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    const url = `${window.location.origin}${path}`;
+    try { await navigator.clipboard.writeText(url); } catch { window.prompt("Copy this link:", url); return; }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button type="button" onClick={copy} className="hk-btn hk-btn--ghost hk-btn--block" title={live ? undefined : "The link works once this is published"}>
+      {copied ? "✓ Link copied" : live ? "Copy link" : "Copy link (works once published)"}
+    </button>
   );
 }

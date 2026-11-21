@@ -1,20 +1,23 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-const NAV = [
-  { href: "/admin", label: "Overview", admin: true },
-  { href: "/admin/offerings", label: "Courses and events", admin: true },
-  { href: "/admin/requests", label: "Requests", admin: true },
-  { href: "/admin/people", label: "People", admin: true },
-  { href: "/admin/fields", label: "Question library", admin: true },
-  { href: "/admin/homepage", label: "Homepage", admin: true },
-  { href: "/admin/check-in", label: "Door check-in", admin: false },
-  { href: "/admin/admins", label: "Admins", admin: true },
+type Who = "admin" | "volunteer" | "interviewer";
+const NAV: { href: string; label: string; who: Who[] }[] = [
+  { href: "/admin", label: "Overview", who: ["admin"] },
+  { href: "/admin/offerings", label: "Courses and events", who: ["admin"] },
+  { href: "/admin/interviews", label: "Interviews", who: ["admin", "interviewer"] },
+  { href: "/admin/requests", label: "Requests", who: ["admin"] },
+  { href: "/admin/people", label: "People", who: ["admin"] },
+  { href: "/admin/fields", label: "Question library", who: ["admin"] },
+  { href: "/admin/homepage", label: "Homepage", who: ["admin"] },
+  { href: "/admin/check-in", label: "Door check-in", who: ["admin", "volunteer"] },
+  { href: "/admin/admins", label: "Admins", who: ["admin"] },
 ];
 
-const SOON = ["Admissions", "LMS"];
+const SOON = ["LMS"];
 
-export function AdminShell({ children, isAdmin, current }: { children: ReactNode; isAdmin: boolean; current?: string }) {
+export function AdminShell({ children, isAdmin, current, roles = [] }: { children: ReactNode; isAdmin: boolean; current?: string; roles?: string[] }) {
+  const can = (who: Who[]) => isAdmin || who.some((w) => roles.includes(w));
   return (
     <div className="ad">
       <aside className="ad-side">
@@ -24,7 +27,7 @@ export function AdminShell({ children, isAdmin, current }: { children: ReactNode
           <span>Hikmah Admin</span>
         </Link>
         <nav aria-label="Admin">
-          {NAV.filter((n) => isAdmin || !n.admin).map((n) => (
+          {NAV.filter((n) => can(n.who)).map((n) => (
             <Link key={n.href} href={n.href} aria-current={current === n.href ? "page" : undefined}>{n.label}</Link>
           ))}
           {isAdmin && (

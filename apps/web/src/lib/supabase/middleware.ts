@@ -6,7 +6,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from "../env";
 /** Paths a signed-in user with an unfinished profile may still visit. */
 const PROFILE_EXEMPT = ["/complete-profile", "/sign-in", "/auth"];
 /** Paths that need a signed-in user. */
-const SIGNED_IN_ONLY = ["/account", "/complete-profile", "/admin"];
+const SIGNED_IN_ONLY = ["/account", "/complete-profile", "/admin", "/admissions"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

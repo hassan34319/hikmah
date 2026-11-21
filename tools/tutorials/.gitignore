@@ -1,3 +1,7 @@
 .auth.json
 out/
 node_modules/
+work-*/
+ask/
+*.log
+poll-email.mjs

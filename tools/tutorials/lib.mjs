@@ -9,7 +9,7 @@ const CURSOR = `
     const c = document.createElement('div');
     c.id = '__hk_cursor';
     c.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24"><path d="M4 2l15 10.5-6.6 1.2 3.9 7.3-2.7 1.4-3.9-7.3L4 20z" fill="#0B1B33" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-    let pos = { x: 960, y: 540 };
+    let pos = { x: 640, y: 360 };
     try { pos = JSON.parse(sessionStorage.getItem('__hk_pos')) || pos; } catch {}
     Object.assign(c.style, { position: 'fixed', left: 0, top: 0, zIndex: 2147483647, pointerEvents: 'none',
       transform: 'translate(' + pos.x + 'px,' + pos.y + 'px)', transition: 'transform 0ms', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.25))' });
@@ -22,14 +22,37 @@ const CURSOR = `
 })();`;
 
 import readline from 'node:readline/promises';
+import fs from 'node:fs';
+import path from 'node:path';
+
+/** Ask a question in the terminal, or through files when ASK_DIR is set (for unattended runs). */
+export async function askHuman(q) {
+  const dir = process.env.ASK_DIR;
+  if (!dir) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const a = (await rl.question(`\n>>> ${q} `)).trim(); rl.close(); return a;
+  }
+  const ans = path.join(dir, 'answer.txt');
+  fs.rmSync(ans, { force: true });
+  fs.writeFileSync(path.join(dir, 'question.txt'), `${new Date().toISOString()} ${q}\n`);
+  console.log(`>>> waiting for ${ans}: ${q}`);
+  for (let i = 0; i < 600; i++) {
+    if (fs.existsSync(ans)) { const a = fs.readFileSync(ans, 'utf8').trim(); if (a) { fs.rmSync(ans); fs.rmSync(path.join(dir, 'question.txt'), { force: true }); return a; } }
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  throw new Error('No answer within 10 minutes');
+}
 
 export function makeDirector(page, t0, { inbox } = {}) {
   const marks = [];
+  const HOLD = Number(process.env.HOLD ?? 0.65); // scale for on-screen holds
   const wait = (ms) => page.waitForTimeout(ms);
+  const hold = (ms) => page.waitForTimeout(Math.round(ms * HOLD));
+  const fast = async (fn, speed = 4) => { const from = now(); try { return await fn(); } finally { marks.push({ t: from, type: 'fast', to: now(), speed }); } };
   const now = () => (Date.now() - t0) / 1000;
 
   async function cursorTo(x, y) {
-    const from = await page.evaluate(() => { try { return JSON.parse(sessionStorage.getItem('__hk_pos')) || { x: 960, y: 540 }; } catch { return { x: 960, y: 540 }; } });
+    const from = await page.evaluate(() => { try { return JSON.parse(sessionStorage.getItem('__hk_pos')) || { x: 640, y: 360 }; } catch { return { x: 640, y: 360 }; } });
     const dist = Math.hypot(x - from.x, y - from.y);
     const ms = Math.round(Math.min(1100, Math.max(350, dist * 0.75)));
     await page.evaluate(({ x, y, ms }) => {
@@ -54,7 +77,9 @@ export function makeDirector(page, t0, { inbox } = {}) {
 
   async function point(loc, dx = 0.5, dy = 0.5) {
     const b = await reveal(loc);
-    await cursorTo(b.x + b.width * dx, b.y + b.height * dy);
+    const x = b.x + b.width * dx, y = b.y + b.height * dy;
+    marks.push({ t: now(), type: 'focus', x, y, w: b.width, h: b.height });
+    await cursorTo(x, y);
     return b;
   }
 
@@ -67,7 +92,7 @@ export function makeDirector(page, t0, { inbox } = {}) {
   }
 
   return {
-    marks, wait, now,
+    marks, wait: hold, now,
     /** Plus-address of the demo inbox: email('hk.student') -> you+hk.student@gmail.com */
     email(tag) { const [u, dom] = inbox.split('@'); return `${u}+${tag}@${dom}`; },
     chapter(title, sub = '') { marks.push({ t: now(), type: 'chapter', title, sub }); },
@@ -77,33 +102,43 @@ export function makeDirector(page, t0, { inbox } = {}) {
     /** Pause the recording for a terminal question; the edit cuts the pause out. */
     async ask(q) {
       const from = now();
-      const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-      const a = (await rl.question(`\n>>> ${q} `)).trim(); rl.close();
+      const a = await askHuman(q);
       marks.push({ t: from, type: 'cut', to: now() });
       return a;
     },
     /** Start a new step: caption shown in the edit from this moment. */
-    step(title, sub = '') { marks.push({ t: now(), type: 'step', title, sub }); },
+    /** New step. `say` is the voiceover line; `wide` keeps the camera zoomed out (overviews). */
+    step(title, sub = '', opts = {}) { marks.push({ t: now(), type: 'step', title, sub, ...(typeof opts === 'string' ? { say: opts } : opts) }); },
+    /** Ask the camera to pull back to the full page. */
+    wide() { marks.push({ t: now(), type: 'wide' }); },
     /** Ask the editor to zoom on this element for `secs` seconds. */
     async zoom(loc, secs = 3, scale = 1.6) { const b = await reveal(loc); marks.push({ t: now(), type: 'zoom', box: b, secs, scale }); },
     async click(loc, { nav = false } = {}) {
       await point(loc); await ripple(); await wait(150);
-      if (nav) await Promise.all([page.waitForLoadState('networkidle'), loc.click()]); else await loc.click();
-      await wait(nav ? 900 : 450);
+      if (nav) {
+        const from = now();
+        marks.push({ t: from + 0.05, type: 'wide' });
+        await Promise.all([page.waitForURL(() => true).catch(() => {}), loc.click()]);
+        await page.waitForLoadState('networkidle').catch(() => {});
+        marks.push({ t: from, type: 'fast', to: now(), speed: 6 });
+        await wait(500);
+      } else { await loc.click(); await wait(350); }
     },
     async type(loc, text, { clear = true } = {}) {
       await point(loc, 0.2); await ripple();
       await loc.click(); if (clear) await loc.fill('');
-      await loc.pressSequentially(text, { delay: 65 }); await wait(350);
+      await fast(() => loc.pressSequentially(text, { delay: 55 }), 4); await wait(250);
     },
     async select(loc, pick) {
       await point(loc, 0.3); await ripple(); await wait(250);
       const value = typeof pick === 'string' ? pick : await loc.evaluate((el, re) => [...el.options].find((o) => new RegExp(re, 'i').test(o.text))?.value, pick.source);
       await loc.selectOption(value); await wait(600);
     },
-    async scrollBy(y) { await page.evaluate((y) => window.scrollBy({ top: y, behavior: 'smooth' }), y); await wait(1100); },
-    async scrollTop() { await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' })); await wait(900); },
-    async goto(url) { await page.goto(url, { waitUntil: 'networkidle' }); await wait(700); },
+    async scrollBy(y) { marks.push({ t: now(), type: 'wide' }); await page.evaluate((y) => window.scrollBy({ top: y, behavior: 'smooth' }), y); await wait(1100); },
+    async scrollTop() { marks.push({ t: now(), type: 'wide' }); await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' })); await wait(900); },
+    async goto(url) { marks.push({ t: now(), type: 'wide' }); await fast(() => page.goto(url, { waitUntil: 'networkidle' }), 8); await wait(500); },
+    /** Wait for something slow (a send, a save) and fast-forward through it in the edit. */
+    async until(fn) { return fast(fn, 8); },
     point,
   };
 }
