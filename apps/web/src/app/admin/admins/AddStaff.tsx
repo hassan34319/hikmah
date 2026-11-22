@@ -13,10 +13,12 @@ export function AddStaff() {
       <label className="ad-label">Access
         <select name="role" className="ad-input" defaultValue="volunteer">
           <option value="volunteer">Volunteer: door check-in only</option>
+          <option value="interviewer">Interviewer: scores admission interviews only</option>
           <option value="admin">Admin: everything except managing admins</option>
           <option value="super_admin">Super admin: everything, including this page</option>
         </select>
       </label>
+      <small className="ad-muted">Someone can have more than one role. Add them again with another role to combine, e.g. volunteer and interviewer.</small>
       <button className="hk-btn hk-btn--primary hk-btn--sm" disabled={pending} style={{ justifySelf: "start" }}>{pending ? "Saving…" : "Give access"}</button>
     </form>
   );

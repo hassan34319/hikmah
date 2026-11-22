@@ -425,6 +425,9 @@ textarea.hk-input { min-height: 110px; resize: vertical; }
 .ad-stat small { font-size: 12px; color: var(--hk-muted); }
 .ad-grid { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
 @media (min-width: 1100px) { .ad-grid { grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); } }
+/* Admissions: the side panel only sits beside the board on wide screens, so it never covers it. */
+@media (min-width: 1100px) and (max-width: 1439px) { .ad-grid--wide { grid-template-columns: minmax(0, 1fr); } .ad-grid--wide > aside { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; } }
+@media (min-width: 1440px) { .ad-grid--wide { grid-template-columns: minmax(0, 1fr) 340px; } }
 .ad-table-wrap { overflow-x: auto; }
 .ad-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .ad-table th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--hk-muted); padding: 10px 12px; border-bottom: 1px solid var(--hk-border); white-space: nowrap; }
@@ -441,6 +444,7 @@ textarea.hk-input { min-height: 110px; resize: vertical; }
 .ad-pill--published, .ad-pill--confirmed, .ad-pill--attended { background: #E7F4EC; color: #1F7A4D; }
 .ad-pill--draft, .ad-pill--submitted { background: #EAF2FB; color: #1E4F86; }
 .ad-pill--waitlisted { background: #FFF4DC; color: #8A5A00; }
+.ad-pill--interviewer { background: #F1ECFB; color: #5B3FA3; }
 .ad-pill--cancelled, .ad-pill--archived, .ad-pill--no_show, .ad-pill--closed { background: #EEF1F5; color: #5A6478; }
 .ad-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--hk-border); overflow-x: auto; }
 .ad-tabs a { padding: 10px 14px; font-size: 14px; font-weight: 600; color: var(--hk-muted); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
@@ -457,7 +461,8 @@ textarea.hk-input { min-height: 110px; resize: vertical; }
 .ad-list > :last-child { border-bottom: 0; }
 .ad-form { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
 @media (min-width: 1100px) { .ad-form { grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); } }
-.ad-form__col { display: grid; gap: 20px; }
+.ad-form__col { display: grid; gap: 20px; min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.ad-grid > * { min-width: 0; }
 .ad-fields { display: grid; gap: 14px; }
 .ad-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .ad-label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; color: #34445A; }
@@ -583,7 +588,23 @@ textarea.ad-input { min-height: 90px; resize: vertical; line-height: 1.5; }
 .ad-pick__list small { display: block; font-size: 12px; color: var(--hk-muted); }
 
 /* Admissions */
-.am-steps { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.am-steps { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 600px) { .am-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1240px) and (max-width: 1439px), (min-width: 1720px) { .am-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.am-step > form, .am-step > div { min-width: 0; }
+.am-slots { display: grid; gap: 14px; margin-bottom: 16px; }
+.am-slots h3 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--hk-ink); }
+.am-slots h3 small { font-weight: 500; color: var(--hk-muted); margin-left: 6px; }
+.am-slotgrid { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+.am-slot { position: relative; border: 1px solid var(--hk-border); border-radius: 10px; padding: 6px 8px; font-size: 13px; font-weight: 600; line-height: 1.25; background: #fff; }
+.am-slot small { display: block; font-size: 11px; font-weight: 500; color: var(--hk-muted); }
+.am-slot.is-full { background: #EEF7F1; border-color: #BFE3CB; }
+.am-slot form { position: absolute; top: 2px; right: 2px; }
+.am-slot form button { width: 20px; height: 20px; border: 0; border-radius: 6px; background: transparent; color: #B42318; font-size: 11px; cursor: pointer; line-height: 1; }
+.am-slot form button:hover { background: #FDECEC; }
+.am-slotform { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.am-slotform .ad-label { min-width: 0; }
+.am-slotform .am-full { grid-column: 1 / -1; }
 .am-step { background: #fff; border: 1px solid var(--hk-border); border-radius: 16px; padding: 14px; display: grid; gap: 10px; align-content: start; }
 .am-step__head { display: flex; gap: 10px; align-items: flex-start; }
 .am-step__head > span { width: 26px; height: 26px; border-radius: 999px; background: var(--hk-ink); color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: 0 0 26px; }
@@ -697,3 +718,5 @@ textarea.ad-input { min-height: 90px; resize: vertical; line-height: 1.5; }
   .tp-top { padding: 12px 16px; }
   .tp-stats span { font-size: 15px; padding: 5px 11px; }
 }
+/* Applicant details come first on narrower screens, so they never sit on top of the board. */
+@media (max-width: 1439px) { .ad-grid--wide > .am-aside--detail { order: -1; } }

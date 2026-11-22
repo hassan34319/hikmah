@@ -56,6 +56,13 @@ export default async function Admissions({ params, searchParams }: { params: Pro
     interview: r.interview_score != null ? Number(r.interview_score) : null,
     combined: combined(r.test_score, r.interview_score), studentId: r.student_id, sent: !!r.decision_sent_at, href: href({ a: r.id }),
   }));
+  const days: [string, { id: string; time: string; venue: string; booked: number; capacity: number }[]][] = [];
+  for (const s of slots ?? []) {
+    const day = fmtDate(s.starts_at, { weekday: "short", day: "numeric", month: "short" });
+    const item = { id: s.id, time: fmtDate(s.starts_at, { hour: "numeric", minute: "2-digit" }), venue: (s.venues as unknown as { name: string } | null)?.name ?? "", booked: booked.get(s.id) ?? 0, capacity: s.capacity };
+    const last = days[days.length - 1];
+    if (last && last[0] === day) last[1].push(item); else days.push([day, [item]]);
+  }
   const pendingDecisions = all.filter((r) => ["selected", "waitlisted", "not_selected"].includes(r.stage) && !r.decision_sent_at).length;
   const done = all.filter((r) => r.test_submitted_at).length;
 
@@ -77,10 +84,10 @@ export default async function Admissions({ params, searchParams }: { params: Pro
         {STAGES.map((s) => <Link key={s.key} href={`/admin/offerings/${id}/admissions?stage=${s.key}`} className="ad-chip" aria-current={stage === s.key}>{s.short} ({count(s.key)})</Link>)}
       </nav>
 
-      <div className="ad-grid">
+      <div className="ad-grid ad-grid--wide">
         <Board offeringId={id} rows={rows} pendingDecisions={pendingDecisions} campuses={(venues ?? []).map((v) => v.name)} />
 
-        <aside className="ad-form__col">
+        <aside className={`ad-form__col${sel ? " am-aside--detail" : ""}`}>
           {sel ? (
             <section className="ad-card ad-detail">
               <div className="ad-card__head"><h2>{sel.profiles?.full_name}</h2><Link href={href({ a: undefined })} aria-label="Close" className="ad-muted">✕</Link></div>
@@ -113,14 +120,21 @@ export default async function Admissions({ params, searchParams }: { params: Pro
             <>
               <section className="ad-card">
                 <h2>Interview slots</h2>
-                <div className="ad-list" style={{ marginBottom: 14 }}>
-                  {(slots ?? []).map((s) => (
-                    <div key={s.id}>
-                      <span>{fmtDate(s.starts_at, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}<br /><span className="ad-muted">{(s.venues as unknown as { name: string } | null)?.name ?? ""} · {booked.get(s.id) ?? 0}/{s.capacity} booked</span></span>
-                      {!(booked.get(s.id)) && <form action={deleteSlot}><input type="hidden" name="slot_id" value={s.id} /><input type="hidden" name="offering_id" value={id} /><button className="ad-icon-btn ad-icon-btn--danger" aria-label="Delete slot">✕</button></form>}
+                <div className="am-slots">
+                  {days.map(([day, list]) => (
+                    <div key={day}>
+                      <h3>{day}<small>{list[0]?.venue}{list.some((x) => x.venue !== list[0]?.venue) ? " and others" : ""} · {list.reduce((a, x) => a + x.booked, 0)}/{list.reduce((a, x) => a + x.capacity, 0)} booked</small></h3>
+                      <div className="am-slotgrid">
+                        {list.map((x) => (
+                          <div key={x.id} className={`am-slot${x.booked >= x.capacity ? " is-full" : ""}`} title={x.venue}>
+                            {x.time}<small>{x.booked}/{x.capacity} booked</small>
+                            {!x.booked && <form action={deleteSlot}><input type="hidden" name="slot_id" value={x.id} /><input type="hidden" name="offering_id" value={id} /><button aria-label={`Delete ${x.time} slot`}>✕</button></form>}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
-                  {!(slots ?? []).length && <p className="ad-muted" style={{ margin: 0 }}>No slots yet. Add some before inviting people to interview.</p>}
+                  {!days.length && <p className="ad-muted" style={{ margin: 0 }}>No slots yet. Add some before inviting people to interview.</p>}
                 </div>
                 <SlotForm offeringId={id} venues={venues ?? []} />
               </section>

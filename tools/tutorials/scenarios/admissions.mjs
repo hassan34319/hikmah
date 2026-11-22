@@ -3,6 +3,7 @@
 import { solve, watchItems } from '../solver.mjs';
 
 const APPLICANT_TAG = process.env.APPLICANT_TAG ?? 'hk.studentvb20';
+const NAME = process.env.APPLICANT_NAME ?? 'Abdullah Khan';
 const COURSE = '10000000-0000-4000-8000-000000000004';
 
 export const intro = { title: 'Admissions', sub: 'From application to student ID', say: "Here's how admissions work at Hikmah, from the admission test to the interview to the final decision, for both the team and the applicant." };
@@ -56,7 +57,7 @@ export const chapters = [
       d.step('The Admissions tab', 'Every application to the course, by stage', { say: 'Every course has an Admissions tab. It shows each application and where it stands.', wide: true });
       await d.wait(1800);
       d.step('Send the test', 'Tick applicants, press Send', { say: "Tick the applicants you'd like to shortlist, and press Send test. Each one gets a personal link by email." });
-      await d.check(row(page, 'Abdullah Khan').locator('input[type="checkbox"]'));
+      await d.check(row(page, NAME).locator('input[type="checkbox"]'));
       await submitAndWait(page, d, page.getByRole('button', { name: /^Send test to/ }), page.locator('.am-step .ad-alert--ok, .am-step .ad-alert--err'));
       await d.point(page.locator('.am-step .ad-alert').first());
       await d.wait(1200);
@@ -73,8 +74,20 @@ export const chapters = [
       await d.click(page.getByRole('link', { name: /admission test/i }).first(), { nav: true });
       d.step('Before they start', 'About 15 minutes, five quick games', { say: 'They see what to expect: about fifteen minutes of quick puzzles, in one sitting, without AI.', wide: true });
       await d.wait(2000);
-      await d.click(page.getByRole('link', { name: /start the test/i }), { nav: true });
+      await d.click(page.getByRole('link', { name: /start the test|^Continue$/i }).first(), { nav: true });
       const items = watchItems(page);
+      // Watch tiles light up during memory rounds (as a person would).
+      await page.evaluate(() => {
+        window.__seq = [];
+        new MutationObserver((ms) => {
+          const h = document.querySelector('.tp-card h3')?.textContent ?? '';
+          if (!/Watch/.test(h)) return;
+          for (const m of ms) {
+            const el = m.target;
+            if (el.classList?.contains('is-lit') && el.parentElement?.classList.contains('tp-mem')) window.__seq.push([...el.parentElement.children].indexOf(el));
+          }
+        }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+      });
       const said = {};
       const lines = {
         pattern: ['Pattern grid', 'Pick the piece that completes the grid', 'Five mini-games. First, pattern grids: pick the piece that completes the grid.'],
@@ -85,25 +98,31 @@ export const chapters = [
       };
       let n = 0;
       for (let guard = 0; guard < 60; guard++) {
-        const intro = page.locator('.tp-intro button');
-        if (await intro.count()) { await page.waitForTimeout(900); await intro.click(); }
-        const card = await page.waitForSelector('.tp-card h3, .tp-essay', { timeout: 30_000 });
+        await page.waitForSelector('.tp-intro button, .tp-card h3, .tp-essay', { timeout: 30_000 });
         if (await page.locator('.tp-essay').count()) break;
+        const intro = page.locator('.tp-intro button');
+        if (await intro.count()) { await page.waitForTimeout(1200); await intro.click(); await page.waitForSelector('.tp-card h3', { timeout: 30_000 }); }
+        const card = null;
         await page.waitForFunction(() => !document.querySelector('.tp-pop'), null, { timeout: 5000 }).catch(() => {});
-        for (let w = 0; w < 30 && !items.item; w++) await page.waitForTimeout(100);
-        const item = items.item; items.item = null;
-        if (!item) continue;
+        const shown = Number(((await page.locator('.tp-stats span').first().textContent()) ?? '').split('/')[0]);
+        for (let w = 0; w < 30 && !(items.item && items.item.pos === shown); w++) await page.waitForTimeout(100);
+        const isMemory = (await page.locator('.tp-mem').count()) > 0;
+        const item = items.item && items.item.pos === shown ? items.item : { game: isMemory ? 'memory' : 'unknown', payload: {} };
+        items.item = null;
         n++;
-        if (!said[item.game]) { said[item.game] = 1; const [t, sub, say] = lines[item.game]; d.step(t, sub, { say }); }
-        const ans = solve(item);
+        if (lines[item.game] && !said[item.game]) { said[item.game] = 1; const [t, sub, say] = lines[item.game]; d.step(t, sub, { say }); }
+        const ans = item.game === 'unknown' ? 0 : item.game === 'memory' && !item.payload.sequence ? null : solve(item);
         const miss = n === 9 || n === 27; // a couple of honest mistakes
         if (item.game === 'memory') {
           await page.waitForSelector('text=/Your turn/', { timeout: 20_000 });
-          for (const tile of ans) await page.locator('.tp-mem button').nth(miss ? (tile + 1) % 9 : tile).click();
+          const seen = await page.evaluate(() => { const s = window.__seq; window.__seq = []; return s; });
+          const need = Number(((await page.locator('.tp-card h3').textContent()) ?? '').match(/tap (\d+)/)?.[1] ?? 0);
+          const seq = (ans ?? seen).slice(0, need);
+          for (const tile of seq) await page.locator('.tp-mem button').nth(miss ? (tile + 1) % 9 : tile).click({ timeout: 3000 }).catch(() => {});
         } else {
           await page.waitForTimeout(900 + Math.random() * 1200);
           const opts = page.locator('.tp-opts button');
-          await opts.nth(miss ? (ans + 1) % (await opts.count()) : ans).click();
+          await opts.nth(miss ? (ans + 1) % (await opts.count()) : ans).click({ timeout: 5000 }).catch(() => {});
         }
         await page.waitForTimeout(700);
         void card;
@@ -124,15 +143,16 @@ export const chapters = [
       await as('admin', ctxArgs);
       await d.goto(adm(BASE));
       d.step('Ranked results', 'Highest overall score first', { say: 'Back in the dashboard, applicants are ranked by score. Anyone who left the test window is flagged.', wide: true });
-      await d.point(row(page, 'Abdullah Khan'));
+      await d.point(row(page, NAME));
       await d.wait(1200);
-      await d.click(row(page, 'Abdullah Khan').getByRole('link', { name: 'Abdullah Khan' }), { nav: true });
+      await d.click(row(page, NAME).getByRole('link', { name: NAME }), { nav: true });
       d.step('Each applicant in full', 'Score per game, essay and answers', { say: 'Open anyone to see their score in each game, their essay, and their application.' });
       await d.point(page.locator('aside .ad-card').first(), 0.5, 0.35);
       await d.wait(2200);
       d.step('Invite to interview', 'Everyone above a cut-off score', { say: 'Then invite the strongest to interview. Set a cut-off score, and everyone above it gets an email to book a time.' });
       const cut = page.locator('input[name="cutoff"]');
-      await d.fill(cut, '70');
+      const own = Number(((await row(page, NAME).innerText()).match(/(\d+(?:\.\d)?)\/100/) ?? [])[1] ?? 70);
+      await d.fill(cut, String(Math.min(70, Math.floor(own))));
       await submitAndWait(page, d, page.locator('.am-cut button'), page.locator('.am-step .ad-alert--ok, .am-step .ad-alert--err'));
       await d.point(page.locator('.am-step .ad-alert').first());
       await d.wait(1200);
@@ -161,13 +181,13 @@ export const chapters = [
       await d.goto(`${BASE}/admin/interviews`);
       d.step('Interviews', 'Booked interviews, in time order', { say: 'Interviewers see the day\'s interviews in time order. They can only see the people they interview.', wide: true });
       await d.wait(1500);
-      await d.click(page.getByRole('link', { name: 'Abdullah Khan' }).first(), { nav: true });
+      await d.click(page.getByRole('link', { name: NAME }).first(), { nav: true });
       d.step('Score out of 10', 'With notes for the team', { say: 'They open the applicant\'s file, read the essay, and give a score out of ten with notes.' });
-      await d.point(page.locator('aside'), 0.5, 0.3);
+      await d.point(page.locator('aside.ad-sticky'), 0.5, 0.3);
       await d.wait(1200);
       await d.click(page.locator('.iv-score button', { hasText: /^8$/ }));
       await d.type(page.locator('textarea[name="notes"]'), 'Sincere and well prepared. Suits the weekend batch.');
-      await submitAndWait(page, d, page.getByRole('button', { name: /Save score|Update score/ }), page.locator('aside .ad-alert'));
+      await submitAndWait(page, d, page.getByRole('button', { name: /Save score|Update score/ }), page.locator('aside.ad-sticky .ad-alert'));
       await d.wait(1000);
     },
   },
@@ -179,8 +199,8 @@ export const chapters = [
       d.step('Side by side', 'Test, interview and overall', { say: 'Now the test and interview scores sit side by side, with an overall score.', wide: true });
       await d.wait(1600);
       d.step('Decide', 'Selected, waitlisted or not selected', { say: 'Tick who to accept, choose Selected, their batch and campus, and mark them.' });
-      await d.check(row(page, 'Abdullah Khan').locator('input[type="checkbox"]'));
-      await d.check(row(page, 'Bilal Khan').locator('input[type="checkbox"]'));
+      await d.check(row(page, NAME).locator('input[type="checkbox"]'));
+      if (await row(page, 'Bilal Khan').count()) await d.check(row(page, 'Bilal Khan').locator('input[type="checkbox"]'));
       await page.locator('select[name="decision"]').selectOption('selected');
       await d.fill(page.locator('input[name="batch"]'), 'Weekend morning');
       await page.locator('select[name="campus"]').selectOption({ label: 'Main Campus' });
@@ -189,9 +209,7 @@ export const chapters = [
       await submitAndWait(page, d, page.getByRole('button', { name: /^Email \d+ decision/ }), page.locator('.am-step .ad-alert--ok, .am-step .ad-alert--err'));
       await settle(page);
       await d.goto(adm(BASE, '?stage=selected'));
-      const sid = (await row(page, 'Abdullah Khan').locator('td').last().textContent())?.trim() ?? '';
-      d.note('student_id', sid);
-      await d.point(row(page, 'Abdullah Khan'));
+      await d.point(row(page, NAME));
       await d.wait(1500);
     },
   },
@@ -205,6 +223,7 @@ export const chapters = [
       await d.click(page.getByRole('link', { name: /Admission status/i }).first(), { nav: true });
       d.step('Welcome to Hikmah', 'Their student ID, batch and campus', { say: 'And the applicant sees the good news, with their student ID, batch and campus.', wide: true });
       await d.point(page.locator('.adm-id'));
+      d.note('student_id', ((await page.locator('.adm-id strong').textContent()) ?? '').trim());
       await d.wait(2500);
     },
   },

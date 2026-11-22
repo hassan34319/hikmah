@@ -26,7 +26,7 @@ export default async function AccountPage() {
       .eq("user_id", user.id).order("submitted_at", { ascending: false }),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
   ]);
-  const staff = (roles ?? []).some((r) => ["super_admin", "admin", "volunteer"].includes(r.role));
+  const staff = (roles ?? []).some((r) => ["super_admin", "admin", "interviewer", "volunteer"].includes(r.role));
   type Reg = { id: string; status: string; submitted_at: string; offerings: { slug: string; title: string; starts_at: string | null; offering_types: { kind: string } | null } | null };
   const registrations = (regs ?? []) as unknown as Reg[];
 

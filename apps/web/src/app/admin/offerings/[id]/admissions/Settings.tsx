@@ -22,20 +22,16 @@ export function SettingsForm({ offeringId, intakeYear, prompt }: { offeringId: s
 export function SlotForm({ offeringId, venues }: { offeringId: string; venues: { id: string; name: string }[] }) {
   const [s, act, pending] = useActionState<AdmState, FormData>(addSlots, {});
   return (
-    <form onSubmit={keepValuesOnSubmit(act)} className="ad-fields" style={{ gap: 8 }}>
+    <form onSubmit={keepValuesOnSubmit(act)} className="am-slotform">
       <input type="hidden" name="offering_id" value={offeringId} />
-      {s.message && <div className={`ad-alert ${s.ok ? "ad-alert--ok" : "ad-alert--err"}`}>{s.message}</div>}
+      {s.message && <div className={`ad-alert am-full ${s.ok ? "ad-alert--ok" : "ad-alert--err"}`}>{s.message}</div>}
       <label className="ad-label">Day<input name="day" type="date" className="ad-input" required /></label>
-      <div className="ad-row" style={{ gap: 8 }}>
-        <label className="ad-label">From<input name="from" type="time" className="ad-input" defaultValue="10:00" required /></label>
-        <label className="ad-label">To<input name="to" type="time" className="ad-input" defaultValue="13:00" required /></label>
-      </div>
-      <div className="ad-row" style={{ gap: 8 }}>
-        <label className="ad-label">Every (min)<input name="every" type="number" min={5} max={240} className="ad-input" defaultValue={20} /></label>
-        <label className="ad-label">Per slot<input name="capacity" type="number" min={1} max={50} className="ad-input" defaultValue={1} /></label>
-      </div>
       <label className="ad-label">Campus<select name="venue_id" className="ad-input">{venues.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}</select></label>
-      <button className="hk-btn hk-btn--primary hk-btn--sm" disabled={pending} style={{ justifySelf: "start" }}>{pending ? "Adding…" : "Add slots"}</button>
+      <label className="ad-label">From<input name="from" type="time" className="ad-input" defaultValue="10:00" required /></label>
+      <label className="ad-label">To<input name="to" type="time" className="ad-input" defaultValue="13:00" required /></label>
+      <label className="ad-label">Every (min)<input name="every" type="number" min={5} max={240} className="ad-input" defaultValue={20} /></label>
+      <label className="ad-label">Per slot<input name="capacity" type="number" min={1} max={50} className="ad-input" defaultValue={1} /></label>
+      <button className="hk-btn hk-btn--primary hk-btn--sm am-full" disabled={pending} style={{ justifySelf: "start" }}>{pending ? "Adding…" : "Add slots"}</button>
     </form>
   );
 }

@@ -8,11 +8,14 @@ import { RegistrationEmail } from "./RegistrationEmail";
 import { RequestNotificationEmail, RequestReceivedEmail } from "./RequestEmails";
 import { FeedbackEmail } from "./FeedbackEmail";
 import { InviteEmail } from "./InviteEmail";
+import { AdmissionEmail, admissionSubject } from "./AdmissionEmails";
 
 const SITE = "https://hikmah-navy.vercel.app";
 const logoUrl = `${SITE}/logo.png`;
 const out = process.argv[2] ?? "out/emails";
 mkdirSync(out, { recursive: true });
+const MUNEEB = "hassaniqbal19343+hk.muneeb.raza@gmail.com";
+const ADM = `${SITE}/admissions/5fa8f2b4-e236-4b19-9d8d-41274f68cff1`;
 const D = (v: string) => (v === "-" ? "" : v);
 const child = (name: string, r: [string, string][]) => ({ title: `Child: ${name}`, rows: r.map(([k, v]) => [k, D(v)] as [string, string]).filter(([, v]) => v) });
 
@@ -53,6 +56,22 @@ const emails: Record<string, { to: string; subject: string; el: ReturnType<typeo
     el: h(InviteEmail, { firstName: "Hamza", title: "The Economics of Time", subtitle: "Feel Good Fridays", speaker: "Maulana Dr. Muhammad Areeb Nafey",
       when: "Friday, 27 November, 7:30 pm", where: "Main Campus", posterUrl: `${SITE}/seed/event-economics-of-time.jpg`,
       message: "We saved you a seat for this one. See you there, in sha Allah!", url: `${SITE}/events/the-economics-of-time`, kind: "event", logoUrl }),
+  },
+  "adm-test": {
+    to: MUNEEB, subject: admissionSubject("test", "Darse Nizami"),
+    el: h(AdmissionEmail, { kind: "test", firstName: "Muneeb", course: "Darse Nizami", url: ADM, logoUrl }),
+  },
+  "adm-interview": {
+    to: MUNEEB, subject: admissionSubject("interview", "Darse Nizami"),
+    el: h(AdmissionEmail, { kind: "interview", firstName: "Muneeb", course: "Darse Nizami", url: ADM, logoUrl }),
+  },
+  "adm-booked": {
+    to: MUNEEB, subject: admissionSubject("booked", "Darse Nizami"),
+    el: h(AdmissionEmail, { kind: "booked", firstName: "Muneeb", course: "Darse Nizami", url: ADM, when: "Saturday, 28 November at 10:20 am", where: "Main Campus", logoUrl }),
+  },
+  "adm-selected": {
+    to: MUNEEB, subject: admissionSubject("selected", "Darse Nizami"),
+    el: h(AdmissionEmail, { kind: "selected", firstName: "Muneeb", course: "Darse Nizami", url: ADM, studentId: "HKM-27-DN-0003", batch: "Weekend morning", campus: "Main Campus", logoUrl }),
   },
 };
 const meta: Record<string, { to: string; subject: string }> = {};
