@@ -13,6 +13,7 @@ export function AddStaff() {
       <label className="ad-label">Access
         <select name="role" className="ad-input" defaultValue="volunteer">
           <option value="volunteer">Volunteer: door check-in only</option>
+          <option value="faculty">Teacher: posts materials, assignments and quizzes for their classes</option>
           <option value="interviewer">Interviewer: scores admission interviews only</option>
           <option value="admin">Admin: everything except managing admins</option>
           <option value="super_admin">Super admin: everything, including this page</option>

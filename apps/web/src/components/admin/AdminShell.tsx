@@ -5,6 +5,7 @@ type Who = "admin" | "volunteer" | "interviewer";
 const NAV: { href: string; label: string; who: Who[] }[] = [
   { href: "/admin", label: "Overview", who: ["admin"] },
   { href: "/admin/offerings", label: "Courses and events", who: ["admin"] },
+  { href: "/admin/lms", label: "Classes", who: ["admin"] },
   { href: "/admin/interviews", label: "Interviews", who: ["admin", "interviewer"] },
   { href: "/admin/requests", label: "Requests", who: ["admin"] },
   { href: "/admin/people", label: "People", who: ["admin"] },
@@ -13,8 +14,8 @@ const NAV: { href: string; label: string; who: Who[] }[] = [
   { href: "/admin/check-in", label: "Door check-in", who: ["admin", "volunteer"] },
   { href: "/admin/admins", label: "Admins", who: ["admin"] },
 ];
+const PORTALS = [{ href: "/teach", label: "Teaching portal" }];
 
-const SOON = ["LMS"];
 
 export function AdminShell({ children, isAdmin, current, roles = [] }: { children: ReactNode; isAdmin: boolean; current?: string; roles?: string[] }) {
   const can = (who: Who[]) => isAdmin || who.some((w) => roles.includes(w));
@@ -32,8 +33,8 @@ export function AdminShell({ children, isAdmin, current, roles = [] }: { childre
           ))}
           {isAdmin && (
             <div className="ad-side__soon">
-              <span>Coming next</span>
-              {SOON.map((s) => <span key={s}>{s}</span>)}
+              <span>Portals</span>
+              {PORTALS.map((p) => <Link key={p.href} href={p.href}>{p.label} ↗</Link>)}
             </div>
           )}
         </nav>

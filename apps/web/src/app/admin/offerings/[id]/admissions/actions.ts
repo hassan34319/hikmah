@@ -73,7 +73,16 @@ export async function decide(_p: AdmState, form: FormData): Promise<AdmState> {
   if (!picked.length) return { message: "Tick the applicants first." };
   const patch: Partial<AdmissionRow> = { stage: decision, decided_at: new Date().toISOString() };
   const batch = String(form.get("batch") ?? "").trim(); const campus = String(form.get("campus") ?? "").trim();
-  if (decision === "selected") { if (batch) patch.batch = batch; if (campus) patch.campus = campus; }
+  const sectionId = String(form.get("section_id") ?? "").trim();
+  if (decision === "selected") {
+    if (batch) patch.batch = batch; if (campus) patch.campus = campus;
+    if (sectionId) {
+      const { data: sec } = await supabase.from("lms_sections").select("id, name, venues(name)").eq("id", sectionId).eq("offering_id", offeringId).maybeSingle();
+      if (!sec) return { message: "That section no longer exists." };
+      patch.section_id = sec.id; patch.batch = sec.name;
+      const venue = (sec.venues as unknown as { name: string } | null)?.name; if (venue) patch.campus = venue;
+    }
+  }
   const { error } = await supabase.from("admissions").update(patch).eq("offering_id", offeringId).in("id", picked).is("decision_sent_at", null);
   if (error) return { message: error.message };
   revalidatePath(`/admin/offerings/${offeringId}/admissions`);
@@ -95,10 +104,15 @@ export async function sendDecisions(_p: AdmState, form: FormData): Promise<AdmSt
   for (const kind of ["selected", "waitlisted", "not_selected"] as const) {
     const group = todo.filter((r) => r.stage === kind);
     if (!group.length) continue;
-    const res = await email(kind, course, group, (r) => ({ studentId: r.student_id, batch: r.batch, campus: r.campus, url: `${SITE_URL}/events` }));
+    const res = await email(kind, course, group, (r) => ({ studentId: r.student_id, batch: r.batch, campus: r.campus, url: `${SITE_URL}${kind === "selected" ? "/learn" : "/events"}` }));
     sent += res.sent; total += res.total;
   }
   await supabase.from("admissions").update({ decision_sent_at: new Date().toISOString() }).in("id", todo.map((r) => r.id));
+  // Selected students with a section go straight into the LMS.
+  const { data: toPlace } = await supabase.from("admissions").select("user_id, section_id").in("id", todo.filter((r) => r.stage === "selected").map((r) => r.id)).not("section_id", "is", null);
+  const bySection = new Map<string, string[]>();
+  for (const p of toPlace ?? []) if (p.section_id) bySection.set(p.section_id, [...(bySection.get(p.section_id) ?? []), p.user_id]);
+  for (const [section, users] of bySection) await supabase.rpc("lms_place", { p_users: users, p_section: section });
   await supabase.from("registrations").update({ status: "confirmed" }).in("id", (await supabase.from("admissions").select("registration_id").in("id", todo.filter((r) => r.stage === "selected").map((r) => r.id))).data?.map((x) => x.registration_id) ?? []);
   revalidatePath(`/admin/offerings/${offeringId}/admissions`);
   return result(sent, total, "Decision emails sent to");

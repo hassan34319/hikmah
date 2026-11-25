@@ -27,6 +27,8 @@ export default async function AccountPage() {
     supabase.from("user_roles").select("role").eq("user_id", user.id),
   ]);
   const staff = (roles ?? []).some((r) => ["super_admin", "admin", "interviewer", "volunteer"].includes(r.role));
+  const student = (roles ?? []).some((r) => r.role === "student");
+  const teacher = (roles ?? []).some((r) => r.role === "faculty");
   type Reg = { id: string; status: string; submitted_at: string; offerings: { slug: string; title: string; starts_at: string | null; offering_types: { kind: string } | null } | null };
   const registrations = (regs ?? []) as unknown as Reg[];
 
@@ -55,6 +57,8 @@ export default async function AccountPage() {
           <div style={{ color: "var(--hk-muted)" }}>{profile?.area ? `${profile.area}, Karachi` : null}</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
             <ButtonLink href="/complete-profile" variant="ghost" size="sm">Edit details</ButtonLink>
+            {student && <ButtonLink href="/learn" size="sm">My classes</ButtonLink>}
+            {teacher && <ButtonLink href="/teach" size="sm" variant="ghost">Teaching</ButtonLink>}
             {staff && <ButtonLink href="/admin" size="sm">Admin dashboard</ButtonLink>}
             <form action="/auth/sign-out" method="post"><Button type="submit" variant="ghost" size="sm">Sign out</Button></form>
           </div>

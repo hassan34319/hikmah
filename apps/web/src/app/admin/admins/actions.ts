@@ -5,7 +5,7 @@ import type { AppRole } from "@hikmah/db";
 import { requireAdmin } from "@/lib/admin";
 
 export type StaffState = { ok?: boolean; message?: string };
-const ROLES: AppRole[] = ["super_admin", "admin", "interviewer", "volunteer"];
+const ROLES: AppRole[] = ["super_admin", "admin", "faculty", "interviewer", "volunteer"];
 const ERR: Record<string, string> = {
   no_account: "There is no account with that email yet. Ask them to sign up on the website first, then add them here.",
   not_allowed: "Only super admins can change who has access.",
@@ -22,7 +22,7 @@ export async function setRole(_prev: StaffState, form: FormData): Promise<StaffS
   const { error } = await supabase.rpc("staff_set_role", { p_email: email, p_role: role, p_grant: grant });
   if (error) return { message: ERR[error.message] ?? `Could not save: ${error.message}` };
   revalidatePath("/admin/admins");
-  return { ok: true, message: grant ? `${email} is now ${role === "interviewer" ? "an interviewer" : role.replace("_", " ")}.` : `Removed ${role.replace("_", " ")} from ${email}.` };
+  return { ok: true, message: grant ? `${email} is now ${role === "interviewer" ? "an interviewer" : role === "faculty" ? "a teacher" : role.replace("_", " ")}.` : `Removed ${role === "faculty" ? "teacher" : role.replace("_", " ")} from ${email}.` };
 }
 
 export async function removeRole(form: FormData) {

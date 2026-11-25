@@ -76,7 +76,8 @@ export function AdmissionEmail(props: AdmissionEmailProps) {
           <Text style={{ margin: "6px 0 0", fontFamily: "Menlo, Consolas, monospace", fontSize: 26, fontWeight: 700, letterSpacing: 2, color: brand.ink }}>{props.studentId}</Text>
           {(props.batch || props.campus) && <Text style={{ ...small, margin: "8px 0 0" }}>{[props.batch, props.campus].filter(Boolean).join(" · ")}</Text>}
         </Section>
-        <Text style={p}>We will email your class schedule and access to the learning portal before classes begin, in sha Allah.</Text>
+        <Text style={p}>Your timetable, class materials, assignments and quizzes are in My classes on the Hikmah website. Sign in with this email address to open it. Some things may appear closer to the start date, in sha Allah.</Text>
+        {props.url && <Section style={{ margin: "6px 0 18px" }}><Button href={props.url} style={button}>Open My classes</Button></Section>}
       </>}
       {kind === "waitlisted" && <>
         <Text style={h1}>You're on the waitlist</Text>

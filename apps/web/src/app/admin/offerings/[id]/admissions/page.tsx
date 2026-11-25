@@ -32,6 +32,8 @@ export default async function Admissions({ params, searchParams }: { params: Pro
     supabase.from("venues").select("id, name").order("name"),
     supabase.from("form_fields").select("position, fields(key, label, profile_column)").eq("offering_id", id).order("position"),
   ]);
+  const { data: lmsSections } = await supabase.from("lms_sections").select("id, name, intake_year").eq("offering_id", id).eq("archived", false)
+    .eq("intake_year", details?.intake_year ?? new Date().getFullYear() + 1).order("sort").order("name");
   if (!offering) notFound();
   const all = (adm ?? []) as unknown as Row[];
   const stage = (STAGES.some((s) => s.key === sp.stage) ? sp.stage : "all") as AdmissionStage | "all";
@@ -85,7 +87,7 @@ export default async function Admissions({ params, searchParams }: { params: Pro
       </nav>
 
       <div className="ad-grid ad-grid--wide">
-        <Board offeringId={id} rows={rows} pendingDecisions={pendingDecisions} campuses={(venues ?? []).map((v) => v.name)} />
+        <Board offeringId={id} rows={rows} pendingDecisions={pendingDecisions} campuses={(venues ?? []).map((v) => v.name)} sections={(lmsSections ?? []).map((s) => ({ id: s.id, name: s.name }))} />
 
         <aside className={`ad-form__col${sel ? " am-aside--detail" : ""}`}>
           {sel ? (

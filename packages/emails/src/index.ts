@@ -54,3 +54,12 @@ export async function renderAdmissionEmail(props: AdmProps) {
   const [html, text] = await Promise.all([render(el), render(el, { plainText: true })]);
   return { subject: admSubject(props.kind, props.course), html, text };
 }
+
+export { type ClassNoticeKind, type ClassNoticeEmailProps, classNoticeSubject } from "./ClassNoticeEmail";
+import { ClassNoticeEmail, classNoticeSubject as noticeSubject, type ClassNoticeEmailProps } from "./ClassNoticeEmail";
+
+export async function renderClassNoticeEmail(props: ClassNoticeEmailProps) {
+  const el = createElement(ClassNoticeEmail, props);
+  const [html, text] = await Promise.all([render(el), render(el, { plainText: true })]);
+  return { subject: noticeSubject(props.kind, props.title, props.subject), html, text };
+}

@@ -23,7 +23,7 @@ function Msg({ s }: { s: AdmState }) {
   return s.message ? <div className={`ad-alert ${s.ok ? "ad-alert--ok" : "ad-alert--err"}`} style={{ fontSize: 13 }}>{s.message}</div> : null;
 }
 
-export function Board({ offeringId, rows, pendingDecisions, campuses }: { offeringId: string; rows: BoardRow[]; pendingDecisions: number; campuses: string[] }) {
+export function Board({ offeringId, rows, pendingDecisions, campuses, sections }: { offeringId: string; rows: BoardRow[]; pendingDecisions: number; campuses: string[]; sections: { id: string; name: string }[] }) {
   const [sel, setSel] = useState<string[]>([]);
   const [t, tAct, tP] = useActionState<AdmState, FormData>(sendTest, {});
   const [i, iAct, iP] = useActionState<AdmState, FormData>(inviteInterview, {});
@@ -56,11 +56,20 @@ export function Board({ offeringId, rows, pendingDecisions, campuses }: { offeri
             <select name="decision" className="ad-input" defaultValue="selected" aria-label="Decision">
               <option value="selected">Selected</option><option value="waitlisted">Waitlisted</option><option value="not_selected">Not selected</option>
             </select>
-            <div className="ad-row" style={{ gap: 6 }}>
-              <input name="batch" className="ad-input" placeholder="Batch (optional)" list="am-batches" />
-              <select name="campus" className="ad-input" defaultValue="" aria-label="Campus"><option value="">Campus</option>{campuses.map((x) => <option key={x}>{x}</option>)}</select>
-            </div>
-            <datalist id="am-batches"><option>Weekday</option><option>Weekend morning</option><option>Weekend afternoon</option></datalist>
+            {sections.length ? (
+              <select name="section_id" className="ad-input" defaultValue="" aria-label="Section">
+                <option value="">Section (choose for selected)</option>
+                {sections.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+              </select>
+            ) : (
+              <>
+                <div className="ad-row" style={{ gap: 6 }}>
+                  <input name="batch" className="ad-input" placeholder="Batch (optional)" list="am-batches" />
+                  <select name="campus" className="ad-input" defaultValue="" aria-label="Campus"><option value="">Campus</option>{campuses.map((x) => <option key={x}>{x}</option>)}</select>
+                </div>
+                <datalist id="am-batches"><option>Weekday</option><option>Weekend morning</option><option>Weekend afternoon</option></datalist>
+              </>
+            )}
             <button className="hk-btn hk-btn--ghost hk-btn--sm hk-btn--block" disabled={dP || !sel.length}>{dP ? "Saving…" : `Mark ${sel.length || "ticked"}`}</button>
           </form>
           <Msg s={d} />

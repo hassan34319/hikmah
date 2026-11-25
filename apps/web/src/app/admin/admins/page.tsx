@@ -8,8 +8,8 @@ import { AddStaff } from "./AddStaff";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admins" };
 
-const LABEL: Record<string, string> = { super_admin: "Super admin", admin: "Admin", volunteer: "Volunteer", faculty: "Faculty", interviewer: "Interviewer", student: "Student" };
-const STAFF = ["super_admin", "admin", "interviewer", "volunteer"];
+const LABEL: Record<string, string> = { super_admin: "Super admin", admin: "Admin", volunteer: "Volunteer", faculty: "Teacher", interviewer: "Interviewer", student: "Student" };
+const STAFF = ["super_admin", "admin", "faculty", "interviewer", "volunteer"];
 
 export default async function Admins() {
   const { supabase, roles, userId } = await requireAdmin();
@@ -19,7 +19,7 @@ export default async function Admins() {
 
   return (
     <AdminShell isAdmin current="/admin/admins">
-      <AdminHeader title="Admins" sub="Who can open this dashboard. Volunteers only see door check-in. Interviewers only see the Interviews page, where they score the applicants who booked with them. Admins see everything except this page's controls. Super admins can add and remove people here." />
+      <AdminHeader title="Admins" sub="Who can open this dashboard. Volunteers only see door check-in. Teachers use the Teaching portal for the classes they are assigned in Classes. Interviewers only see the Interviews page, where they score the applicants who booked with them. Admins see everything except this page's controls. Super admins can add and remove people here." />
       <div className="ad-grid">
         <section className="ad-card" style={{ padding: 0 }}>
           <div className="ad-table-wrap">
@@ -29,7 +29,7 @@ export default async function Admins() {
                 {staff.map((s) => (
                   <tr key={s.user_id}>
                     <td><Link href={`/admin/people/${s.user_id}`}>{s.full_name ?? s.email}</Link><div className="ad-muted">{s.email}{s.user_id === userId ? " · you" : ""}</div></td>
-                    <td><div className="ad-filters">{s.roles.map((r) => <span key={r} className={`ad-pill ad-pill--${r === "super_admin" ? "confirmed" : r === "admin" ? "draft" : r === "interviewer" ? "interviewer" : "waitlisted"}`}>{LABEL[r]}</span>)}</div></td>
+                    <td><div className="ad-filters">{s.roles.map((r) => <span key={r} className={`ad-pill ad-pill--${r === "super_admin" ? "confirmed" : r === "admin" ? "draft" : r === "interviewer" ? "interviewer" : r === "faculty" ? "teacher" : "waitlisted"}`}>{LABEL[r]}</span>)}</div></td>
                     {isSuper && (
                       <td style={{ textAlign: "right" }}>
                         <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
