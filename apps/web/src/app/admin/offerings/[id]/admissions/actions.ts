@@ -86,7 +86,7 @@ export async function decide(_p: AdmState, form: FormData): Promise<AdmState> {
   const { error } = await supabase.from("admissions").update(patch).eq("offering_id", offeringId).in("id", picked).is("decision_sent_at", null);
   if (error) return { message: error.message };
   revalidatePath(`/admin/offerings/${offeringId}/admissions`);
-  return { ok: true, message: `Marked ${picked.length} as ${decision.replace("_", " ")}. Press "Send decision emails" when you are ready.` };
+  return { ok: true, message: `Marked ${picked.length} as ${decision.replace("_", " ")}. Nothing is emailed until you press "Email decisions" under Send decisions.` };
 }
 
 /** Emails every decided applicant who has not been told yet. Selected applicants get their student ID. */

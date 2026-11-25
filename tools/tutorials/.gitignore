@@ -5,3 +5,4 @@ work-*/
 ask/
 *.log
 poll-email.mjs
+.auth-*.json
