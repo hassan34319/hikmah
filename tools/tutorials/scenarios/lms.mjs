@@ -101,7 +101,7 @@ export const chapters = [
       await d.select(f.locator('select[name="decision"]'), 'selected');
       await d.select(f.locator('select[name="section_id"]'), /Weekdays/);
       await d.click(f.getByRole('button', { name: /^Mark/ }));
-      await saved(page, d, f.locator('.ad-alert'));
+      await saved(page, d);
       d.step('Send the welcome', 'Student ID and a link to My classes', { say: 'Send the decision. They get their student ID and a link to their classes.' });
       await d.click(page.getByRole('button', { name: /^Email \d+ decision/ }));
       await saved(page, d);

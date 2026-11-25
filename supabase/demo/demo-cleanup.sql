@@ -9,3 +9,10 @@ delete from auth.users where email ~ '\+hk\.' or id::text like 'de0d0000-%';
 delete from public.offerings where slug like 'demo-%';
 delete from public.fields where not is_system and label in ('Which campus is closer to you?', 'Will you attend in person?');
 delete from public.interview_slots where offering_id = '10000000-0000-4000-8000-000000000004';
+
+-- LMS test content on QHD from the live test (sections and subjects named "Test ...")
+delete from public.lms_posts where offering_id = '10000000-0000-4000-8000-000000000003' and title like 'Test%';
+delete from public.lms_assignments where offering_id = '10000000-0000-4000-8000-000000000003' and title like 'Test%';
+delete from public.lms_quizzes where offering_id = '10000000-0000-4000-8000-000000000003' and title like 'Test%';
+delete from public.lms_sections where offering_id = '10000000-0000-4000-8000-000000000003' and name like 'Test %';
+delete from public.lms_subjects where offering_id = '10000000-0000-4000-8000-000000000003' and name like 'Test %';
