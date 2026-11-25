@@ -27,8 +27,9 @@ export default async function AssignmentDetail({ params, searchParams }: { param
   const handed = students.filter((s) => byUser.has(s.user_id));
   const missing = students.filter((s) => !byUser.has(s.user_id));
   const marked = handed.filter((s) => byUser.get(s.user_id)?.marked_at).length;
-  const show = sp.show === "marked" || sp.show === "all" ? sp.show : "open";
-  const rows = handed.filter((s) => show === "all" || (show === "marked" ? !!byUser.get(s.user_id)?.marked_at : !byUser.get(s.user_id)?.marked_at));
+  const show = sp.show === "marked" || sp.show === "open" ? sp.show : "all";
+  const rows = handed.filter((s) => show === "all" || (show === "marked" ? !!byUser.get(s.user_id)?.marked_at : !byUser.get(s.user_id)?.marked_at))
+    .sort((x, y) => Number(!!byUser.get(x.user_id)?.marked_at) - Number(!!byUser.get(y.user_id)?.marked_at));
   const files = asFiles(a.files);
   const max = Number(a.max_marks);
 
@@ -55,7 +56,7 @@ export default async function AssignmentDetail({ params, searchParams }: { param
         <div className="lm-cardhead">
           <h2>Submissions</h2>
           <div className="ad-filters">
-            {(["open", "marked", "all"] as const).map((k) => <Link key={k} href={`/teach/assignments/${id}${k === "open" ? "" : `?show=${k}`}`} className="ad-chip" aria-current={show === k ? "page" : undefined}>{k === "open" ? `To mark (${handed.length - marked})` : k === "marked" ? `Marked (${marked})` : `All (${handed.length})`}</Link>)}
+            {(["all", "open", "marked"] as const).map((k) => <Link key={k} href={`/teach/assignments/${id}${k === "all" ? "" : `?show=${k}`}`} className="ad-chip" aria-current={show === k ? "page" : undefined}>{k === "open" ? `To mark (${handed.length - marked})` : k === "marked" ? `Marked (${marked})` : `All (${handed.length})`}</Link>)}
           </div>
         </div>
         {rows.length ? (
@@ -65,7 +66,7 @@ export default async function AssignmentDetail({ params, searchParams }: { param
               const late = new Date(sub.submitted_at) > new Date(a.due_at);
               const sf = asFiles(sub.files);
               return (
-                <li key={st.user_id} className="lm-sub">
+                <li key={st.user_id} className="lm-subrow">
                   <div className="lm-sub__who">
                     <strong>{st.profiles?.full_name ?? st.profiles?.email}</strong>
                     <span className="ad-muted">{st.lms_sections?.name} · {fmtDate(sub.submitted_at, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}{late && <span className="lm-late"> late</span>}</span>

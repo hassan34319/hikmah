@@ -120,7 +120,9 @@ export function makeDirector(page, t0, { inbox } = {}) {
       if (nav) {
         const from = now();
         marks.push({ t: from + 0.05, type: 'wide' });
-        await Promise.all([page.waitForURL(() => true).catch(() => {}), loc.click()]);
+        const before = page.url();
+        await loc.click();
+        await page.waitForURL((u) => u.toString() !== before, { timeout: 20_000 }).catch(() => {});
         await page.waitForLoadState('networkidle').catch(() => {});
         marks.push({ t: from, type: 'fast', to: now(), speed: 6 });
         await wait(500);

@@ -9,6 +9,7 @@ import { RequestNotificationEmail, RequestReceivedEmail } from "./RequestEmails"
 import { FeedbackEmail } from "./FeedbackEmail";
 import { InviteEmail } from "./InviteEmail";
 import { AdmissionEmail, admissionSubject } from "./AdmissionEmails";
+import { ClassNoticeEmail, classNoticeSubject } from "./ClassNoticeEmail";
 
 const SITE = "https://hikmah-navy.vercel.app";
 const logoUrl = `${SITE}/logo.png`;
@@ -16,6 +17,8 @@ const out = process.argv[2] ?? "out/emails";
 mkdirSync(out, { recursive: true });
 const MUNEEB = "hassaniqbal19343+hk.muneeb.raza@gmail.com";
 const ADM = `${SITE}/admissions/5fa8f2b4-e236-4b19-9d8d-41274f68cff1`;
+const AYESHA = "hassaniqbal19343+hk.lms.ayesha@gmail.com";
+const AYESHA_ID = process.env.AYESHA_ID ?? "HKM-27-QS-0004";
 const D = (v: string) => (v === "-" ? "" : v);
 const child = (name: string, r: [string, string][]) => ({ title: `Child: ${name}`, rows: r.map(([k, v]) => [k, D(v)] as [string, string]).filter(([, v]) => v) });
 
@@ -72,6 +75,18 @@ const emails: Record<string, { to: string; subject: string; el: ReturnType<typeo
   "adm-selected": {
     to: MUNEEB, subject: admissionSubject("selected", "Darse Nizami"),
     el: h(AdmissionEmail, { kind: "selected", firstName: "Muneeb", course: "Darse Nizami", url: ADM, studentId: "HKM-27-DN-0003", batch: "Weekend morning", campus: "Main Campus", logoUrl }),
+  },
+  "lms-selected": {
+    to: AYESHA, subject: admissionSubject("selected", "Quranic Sciences"),
+    el: h(AdmissionEmail, { kind: "selected", firstName: "Ayesha", course: "Quranic Sciences", url: `${SITE}/learn`, studentId: AYESHA_ID, batch: "Weekdays", campus: "Main Campus", logoUrl }),
+  },
+  "lms-material": {
+    to: AYESHA, subject: classNoticeSubject("material", "Lesson 1: The Arabic noun", "Quranic Arabic"),
+    el: h(ClassNoticeEmail, { kind: "material", firstName: "Ayesha", course: "Quranic Sciences", subject: "Quranic Arabic", title: "Lesson 1: The Arabic noun", body: "Please go through these slides before Monday’s class.", teacher: "Imran Siddiqui", url: `${SITE}/learn/materials`, logoUrl }),
+  },
+  "lms-quiz": {
+    to: AYESHA, subject: classNoticeSubject("quiz", "Week 1 vocabulary quiz", "Quranic Arabic"),
+    el: h(ClassNoticeEmail, { kind: "quiz", firstName: "Ayesha", course: "Quranic Sciences", subject: "Quranic Arabic", title: "Week 1 vocabulary quiz", teacher: "Imran Siddiqui", url: `${SITE}/learn/quizzes`, logoUrl }),
   },
 };
 const meta: Record<string, { to: string; subject: string }> = {};

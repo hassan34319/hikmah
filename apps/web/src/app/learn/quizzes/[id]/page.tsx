@@ -67,7 +67,7 @@ export default async function LearnQuiz({ params, searchParams }: { params: Prom
         </section>
         <section className="ad-card">
           <h2>Your answers</h2>
-          {!reveal && <p className="ad-muted">{q.show_answers ? "Correct answers appear here once the quiz closes." : "Your teacher has chosen not to show the correct answers."}</p>}
+          {!reveal && <p className="ad-muted">{q.show_answers && q.closes_at ? `Correct answers appear here after the quiz closes on ${fmtDate(q.closes_at, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}.` : "Your teacher will go over the answers in class."}</p>}
           <ol className="lm-qs">
             {questions.map((x, i) => {
               const r = resp.get(x.id); const k = key.get(x.id);

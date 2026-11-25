@@ -144,7 +144,7 @@ export function QuizSettings({ scopes, draft }: { scopes: Scope[]; draft: QuizDr
         <label className="ad-label">Time limit (minutes) <small>empty: no limit</small><input name="time_limit_min" type="number" min={1} max={600} className="ad-input" defaultValue={draft.limit} /></label>
       </div>
       <label className="lm-check"><input type="checkbox" name="shuffle" defaultChecked={draft.shuffle} /> Shuffle the question order for each student</label>
-      <label className="lm-check"><input type="checkbox" name="show_answers" defaultChecked={draft.showAnswers} /> Show students the correct answers after the quiz closes</label>
+      <label className="lm-check"><input type="checkbox" name="show_answers" defaultChecked={draft.showAnswers} /> Show students the correct answers after the closing time (needs a closing time above)</label>
       <Msg s={s} />
       <button className="hk-btn hk-btn--primary hk-btn--sm" disabled={pending} style={{ justifySelf: "start" }}>{pending ? "Saving…" : draft.id ? "Save settings" : "Create quiz and add questions"}</button>
     </form>

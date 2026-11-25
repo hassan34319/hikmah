@@ -14,7 +14,8 @@ export default async function LearnMaterials({ searchParams }: { searchParams: P
   const posts = (data ?? []) as unknown as P[];
   const subjects = [...new Map(posts.filter((p) => p.subject_id).map((p) => [p.subject_id!, p.lms_subjects])).entries()].sort((a, b) => (a[1]?.sort ?? 0) - (b[1]?.sort ?? 0));
   const shown = posts.filter((p) => !sp.subject || p.subject_id === sp.subject);
-  const topics = [...new Set(shown.map((p) => p.topic ?? ""))];
+  const group = (p: P) => (p.kind === "announcement" ? "Announcements" : p.topic || "Other");
+  const topics = [...new Set(shown.map(group))].sort((a, b) => Number(b === "Announcements") - Number(a === "Announcements") || Number(a === "Other") - Number(b === "Other"));
   return (
     <LmsShell mode="learn" current="/learn/materials" name={name} other={isTeacher}>
       <LmsHead title="Materials" sub="Slides, notes, links and announcements from your teachers." />
@@ -25,10 +26,10 @@ export default async function LearnMaterials({ searchParams }: { searchParams: P
         </div>
       )}
       {shown.length ? topics.map((t) => (
-        <section key={t || "none"} className="lm-topic">
-          <h2>{t || "Other"}</h2>
+        <section key={t} className="lm-topic">
+          <h2>{t}</h2>
           <ul className="lm-posts">
-            {shown.filter((p) => (p.topic ?? "") === t).map((p) => {
+            {shown.filter((p) => group(p) === t).map((p) => {
               const files = asFiles(p.files as never); const links = asLinks(p.links as never);
               return (
                 <li key={p.id} className={`ad-card lm-post lm-post--${p.kind}`}>
